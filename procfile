@@ -1,2 +1,2 @@
 heroku ps:scale web=1
-web: python manage.py runserver
+worker: python manage.py runserver
