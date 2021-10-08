@@ -52,12 +52,11 @@ def loadComments(request):
 
 def load_posts_data(request):
     currentUser = request.user
-    userFriends = currentUser.friends.through.objects.all()
+    userProfile = Profile.objects.get(user=currentUser)
+    userFriends = userProfile.friends.all()
     friends = []
-
     for frnd in userFriends:
-
-        friendOBJ = Profile.objects.get(user=frnd.user)
+        friendOBJ = Profile.objects.get(id=frnd.id)
         friend = {
             'id': friendOBJ.id,
             'firstName': friendOBJ.firstName,
