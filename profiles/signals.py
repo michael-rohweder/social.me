@@ -11,6 +11,3 @@ def post_save_create_profile(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.create(user=instance)
 
-@receiver(request_finished)
-def processRequest(sender, **kwargs):
-    return redirect('/')
