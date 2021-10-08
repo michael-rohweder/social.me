@@ -26,12 +26,12 @@ def postControl(request):
     form = PostForm
     if request.is_ajax():
         postContent = request.POST.get('postContent')
-        postCreator = Profile.objects.get(user=request.user)
-        newPost = Post()
-        newPost.author = postCreator
-        newPost.content = postContent
-        print(newPost)
-        newPost.save()
+        if postContent != '':
+            postCreator = Profile.objects.get(user=request.user)
+            newPost = Post()
+            newPost.author = postCreator
+            newPost.content = postContent
+            newPost.save()
     return JsonResponse({})
 
 def loadComments(request):
