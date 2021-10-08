@@ -9,6 +9,7 @@ class Profile(models.Model):
     bio = models.TextField(blank=True)
     firstName = models.CharField(max_length=20, blank=True)
     lastName = models.CharField(max_length=30, blank=True)
+    email = models.CharField(max_length=50, blank=True)
     friends = models.ManyToManyField(User, blank=True, related_name="friends")
     profilePic = models.ImageField(default="defaultProfilePic.svg", upload_to='profilePics')
     updated = models.DateTimeField(auto_now=True)

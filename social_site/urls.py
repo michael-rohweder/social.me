@@ -22,8 +22,10 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('signup/', views.signup, name='signup'),
     path('', include('posts.urls', namespace='post')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('userProfile', views.userProfile, name='userProfile')
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
