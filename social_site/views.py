@@ -25,6 +25,8 @@ def signup(request):
             userProfile.firstName = firstName
             userProfile.lastName = lastName
             userProfile.email = email
-            return redirect('userProfile')
+            userProfile.save()
+
+            return redirect('login')
     form = NewUserForm
     return render (request=request, template_name="registration.html", context={"register_form":form})
