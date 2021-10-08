@@ -21,7 +21,10 @@ def signup(request):
             lastName = form.cleaned_data.get('lastName')
             email = form.cleaned_data.get('email')
             userName = form.cleaned_data.get('username')
-            
+            userProfile = Profile.objects.get(user=user)
+            userProfile.firstName = firstName
+            userProfile.lastName = lastName
+            userProfile.email = email
             return redirect('userProfile')
     form = NewUserForm
     return render (request=request, template_name="registration.html", context={"register_form":form})
