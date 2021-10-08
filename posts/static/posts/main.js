@@ -148,7 +148,7 @@ const loadOnce = () => {
                         </p>
                     </div>
                     <div>
-                        <p>${element.content}</p>
+                        <p style="overflow-wrap: anywhere">${element.content}</p>
                     </div>
                     <div style="padding-top:5px;padding-bottom:5px;margin-left:25%;margin-right:25%;margin-top:10px;margin-bottom:10px" class="border-dark border-top border-bottom">
                             <form class="likeControl" data-form-id="${element.id}">
@@ -164,7 +164,7 @@ const loadOnce = () => {
                         </div>
                         <div class="commentContainer" data-container-id="${element.id}">
                             Comments:    
-                            <p id="postComments-${element.id}"></p>
+                            <p style="overflow-wrap: anywhere" id="postComments-${element.id}"></p>
                         </div>
                         <div>
                             <form class="commentControl" data-form-id="${element.id}">
@@ -195,8 +195,12 @@ $(document).ready(function(){
             success: function(response) {
                 data = response.data
                 friends = response.friends
-                if (JSON.stringify(data)!=JSON.stringify(postListOld) || JSON.stringify(friends)!=JSON.stringify(friendListOld)){
+                
+                if (JSON.stringify(data)!=JSON.stringify(postListOld)){
                     updatePosts()
+                }
+                if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
+                    updateFriends(friends)
                     postListOld=data
                     friendListOld=friends
                 } 
@@ -213,8 +217,8 @@ $(document).ready(function(){
             success: function(response) {
                 data = response.comment
                 if (JSON.stringify(data)!=JSON.stringify(commentListOld)){
-                    updatePosts()
-                    postListOld=data
+                    updateComments(data)
+                    commenListOld=data
                 } 
             },
             error: function(error) {
@@ -223,6 +227,21 @@ $(document).ready(function(){
         })
     }, 1000)
 })
+
+function updateFriends(friends) {
+    friendList.innerHTML = ''
+            friends.forEach(element => {
+                friendList.innerHTML += `
+                    <li>${element.firstName} ${element.lastName}</li>
+                `
+            });
+    return None
+}
+
+function updateComments(comments) {
+    loadOnce()
+    return None
+}
 
 const updatePosts = () => {
     loadOnce()
