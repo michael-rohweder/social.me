@@ -1,1 +1,1 @@
-web: gunicorn medium_tutorial.wsgi --log-file -
+web: gunicorn social_site.wsgi --log-file -
