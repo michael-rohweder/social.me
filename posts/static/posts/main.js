@@ -180,7 +180,12 @@ $(document).ready(function(){
             type: 'GET',
             url: "/data/",
             success: function(response) {
+                
                 allPosts = response.allPosts
+                allPosts.forEach(post => {
+                    const timeBox = document.getElementById(`timePosted-${post.id}`)
+                    timeBox.innerText = getTimeElapsed(post)
+                })
                 friends = response.friends
                 if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
                     allPosts.forEach(newPost => {
@@ -216,6 +221,7 @@ $(document).ready(function(){
             type: 'GET',
             url: "/loadComments/",
             success: function(response) {
+                
                 comments = response.comment
                 if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
                     comments.forEach(comment => {
@@ -245,22 +251,6 @@ $(document).ready(function(){
             }
         })
     }, 1000)
-    setInterval(function(){
-        $.ajax ({
-            type: 'GET',
-            url: "/data/",
-            success: function(response) {
-                const posts = response.allPosts
-                posts.forEach(post => {
-                    const timeBox = document.getElementById(`timePosted-${post.id}`)
-                    timeBox.innerText = getTimeElapsed(post)
-                })
-            },
-            error: function(error) {
-                console.log("ERROR:", error)
-            }
-        })
-    }, 60000)
 })
 
 function createPost(post, author, postComments, load) {
