@@ -9,18 +9,8 @@ from profiles.models import Profile
 # Create your views here.
 
 @login_required(login_url='login')
-def post_list_and_create(request):
-    form = PostForm(request.POST or None)
-    if request.is_ajax():
-        if form.is_valid:
-            author = Profile.objects.get(user=request.user)
-            instance = form.save(commit=False)
-            instance.author=author
-            instance.save()
-    context = {
-        'form': form,
-    }
-    return render(request, 'posts/main.html', context)
+def index(request):
+    return render(request, 'posts/main.html')
     
 def postControl(request):
     form = PostForm
@@ -32,55 +22,72 @@ def postControl(request):
             newPost.author = postCreator
             newPost.content = postContent
             newPost.save()
-    return JsonResponse({})
-
-def loadComments(request):
-    if request.is_ajax():
-        comments = Comments.objects.all()
-        comment = []
-        for c in comments:
-            commenterName = c.commenter.firstName + " " + c.commenter.lastName
-            com = {
-                'id': c.id,
-                'comment': c.comment,
-                'post': c.post.id,
-                'commenter': commenterName
+            newPostJSON = {
+                'id': newPost.id,
+                'author': newPost.author.id,
+                'content': newPost.content,
+                'count': newPost.likeCount
             }
-            comment.append(com)
-        return JsonResponse({'comment': comment})
+            newPostAuthorJSON = {
+                'name': postCreator.firstName + " " + postCreator.lastName,
+                'profilePic': str(postCreator.profilePic),
+                'firstName': postCreator.firstName,
+                'lastName': postCreator.lastName
+            }
+            return JsonResponse({'post': newPostJSON, 'author': newPostAuthorJSON})
 
-
-def load_posts_data(request):
+def loadData(request):
     currentUser = request.user
-    userProfile = Profile.objects.get(user=currentUser)
-    userFriends = userProfile.friends.all()
-    friends = []
-    for frnd in userFriends:
+    currentUserProfile = Profile.objects.get(user=currentUser)
+    currentUserFriends = currentUserProfile.friends.all()
+    
+    friendsJSON = []
+    for frnd in currentUserFriends:
         friendOBJ = Profile.objects.get(id=frnd.id)
         friend = {
             'id': friendOBJ.id,
             'firstName': friendOBJ.firstName,
             'lastName': friendOBJ.lastName,
         }
-        friends.append(friend)
-
-    query = Post.objects.all().order_by('-created')
-    data = []
-
-    for obj in query:
-        full_name = obj.author.firstName + " " + obj.author.lastName
-        item = {
-            'id': obj.id,
-            'content': obj.content,
-            'author': obj.author.user.username,
-            'profilePic': str(obj.author.profilePic),
-            'liked': True if request.user in obj.liked.all() else False,
-            'count': obj.likeCount,
-            'name': full_name,
+        friendsJSON.append(friend)
+    
+    allComments = Comments.objects.all().order_by('-created')
+    allCommentsListJSON = []
+    for comment in allComments:
+        com = {
+            'id': comment.id,
+            'comment': comment.comment,
+            'post': comment.post.id,
+            'commenter': comment.commenter.id,
+            'name': comment.commenter.firstName + " " + comment.commenter.lastName,
+            'profilePic': str(comment.commenter.profilePic)
         }
-        data.append(item)
-
-    return JsonResponse({'data': data, 'friends': friends})
+        allCommentsListJSON.append(com)
+    
+    allPosts = Post.objects.all().order_by('-created')
+    allPostListJSON = []
+    for post in allPosts:
+        full_name = post.author.firstName + " " + post.author.lastName
+        item = {
+            'id': post.id,
+            'content': post.content,
+            'author': post.author.user.username,
+            'authorFirstName': post.author.firstName,
+            'authorLastName': post.author.lastName,
+            'profilePic': str(post.author.profilePic),
+            'liked': True if request.user in post.liked.all() else False,
+            'count': post.likeCount,
+            'name': full_name,
+            'created': post.created
+        }
+        allPostListJSON.append(item)
+    currentUserProfileJSON = {
+        'id': currentUserProfile.id,
+        'firstName': currentUserProfile.firstName,
+        'lastName': currentUserProfile.lastName,
+        'profilePic': str(currentUserProfile.profilePic)
+    }
+    return JsonResponse({'currentUser': currentUserProfileJSON, 'allPosts': allPostListJSON, 'friends': friendsJSON, 'comments': allCommentsListJSON})
 
 def likeControl(request):
     if request.is_ajax():
@@ -94,15 +101,53 @@ def likeControl(request):
             post.liked.add(request.user)
         return JsonResponse({'liked': liked, 'count': post.likeCount})
 
+def loadComments(request):
+    if request.is_ajax():
+        comments = Comments.objects.all().order_by('created')
+        commentList = []
+        for comment in comments:
+            commenterName = comment.commenter.firstName + " " + comment.commenter.lastName
+            commentDict = {
+                'id': comment.id,
+                'comment': comment.comment,
+                'post': comment.post.id,
+                'name': commenterName,
+                'profilePic':str(comment.commenter.profilePic)
+            }
+            commentList.append(commentDict)
+        return JsonResponse({'comment': commentList})
+
 def commentControl(request):
     if request.is_ajax():
         pk = request.POST.get('pk')
+        allComments = Comments.objects.all().order_by('created')
         post = Post.objects.get(id=pk)
         comment = Comments()
         comment.post = post
         comment.commenter = Profile.objects.get(user=request.user)
         commenterFullName = comment.commenter.firstName + " " + comment.commenter.lastName
         comment.comment = request.POST.get('comment')
+        commentList = []
+        for comments in allComments:
+            commentOBJ = Comments.objects.get(id=comments.id)
+            com = {
+                'id': commentOBJ.id,
+                'comment': commentOBJ.comment,
+                'post': commentOBJ.post.id,
+                'commenter': commentOBJ.commenter.user.id,
+                'profilePic': str(commentOBJ.commenter.profilePic)
+            }
+            commentList.append(com)
         if comment.comment != '':
             comment.save()
-            return JsonResponse({'comment': str(comment.comment), 'commenter': commenterFullName})
+            return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic)})
+
+
+
+
+
+
+
+
+
+

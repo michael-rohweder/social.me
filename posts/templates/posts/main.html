@@ -16,7 +16,19 @@
 {% endblock left %}
 
 {% block right %}
-    <div class="col-sm-12" style="height:250;max_height:500px;overflow:auto;margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#979184;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
+    <div class="col-sm-11" style="
+        height:250;
+        max_height:500px;
+        overflow:auto;
+        margin-bottom:10px;
+        box-shadow:3px 3px 2px gray;
+        background:#ffffff;
+        padding-top:10px;
+        padding-bottom:10px;
+        margin-top:10px;
+        margin-right:10px;
+        border:solid 1px black"
+    >
         <divclass="col-sm-12 text-left">
             <h3>FRIENDS</h3>
             <ul id="friendList" style="list-style:none">
@@ -28,13 +40,13 @@
 {% block content %}
     <div style="padding-right:10px;overflow:auto;overflow-x:hidden;max-height:500px">
         <div class="row" style="margin-left:5px; margin-right:5px">
-            <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#f0ebeb;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
+            <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#FFFFFF;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
                 <form id="postSubmit">
                     {% csrf_token%}
-                    <div class="input-group" style="padding-left:10px;padding-right:10px">
-                        <input id="postInput" class="form-control" type="text" name="post" placeholder="Create a post">
+                    <div class="input-group" style="padding-left:10px;padding-right:10px;background:#ffffff">
+                        <textarea onkeyup="autoheight(this)" style="background:#DDE2E5;overflow:hidden;height:50px;width:200px;" id="postInput" class="form-control" type="text" name="post" placeholder="Create a post"></textarea>
                         <div class="input-group-btn">
-                            <button class="btn btn-primary" type="submit" name="post_submit">Post</button>
+                            <button style="margin-left:10px" class="btn btn-primary" type="submit" name="post_submit">Post</button>
                         </div>
                     </div>
                 </form>
@@ -42,4 +54,10 @@
         </div>
     </div>
     <div id='posts-box'></div>
+    <script>
+        function autoheight(x) {
+            x.style.height="5px";
+            x.style.height=(15+x.scrollHeight)+"px";
+        }
+    </script>
 {% endblock content %}
