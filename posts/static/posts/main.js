@@ -19,31 +19,6 @@ const getCookie = (name) => {
 const csrftoken = getCookie('csrftoken');
 
 const loadOnce = () => {
-    const postForm = document.getElementById("postSubmit")
-    const postInput = document.getElementById('postInput')
-    postForm.addEventListener("submit", e => {
-        e.preventDefault()
-        $.ajax ({
-            type: 'POST',
-            url: 'postControl/',
-            data: {
-                'csrfmiddlewaretoken': csrftoken,
-                'postContent': postInput.value
-            },
-            success: function(response) {
-                postInput.value = ''
-                postInput.style.height="50px"
-                newPost = response.post
-                author = response.author
-                createPost(newPost, author, '', false)
-                likeControl()
-                commentControl()
-            },
-            error: function(error) {
-                console.log("ERROR:", error)
-            }
-        })
-    })
     $.ajax({
         type: 'GET',
         url: '/data/',
@@ -56,16 +31,47 @@ const loadOnce = () => {
             postListOld = []
             friendListOld = friends
             commentListOld = comments
+
+            //POST BOX EVENTLISTENER
+            const postForm = document.getElementById('postSubmit')
+            const postInput = document.getElementById('postInput')
+            postForm.addEventListener("submit", e => {
+                e.preventDefault()
+                $.ajax ({
+                    type: 'POST',
+                    url: 'postControl/',
+                    data: {
+                        'csrfmiddlewaretoken': csrftoken,
+                        'postContent': postInput.value
+                    },
+                    success: function(response) {
+                        postInput.value = ''
+                        postInput.style.height="50px"
+                        newPost = response.post
+                        author = response.author
+                        createPost(newPost, author, '', false)
+                        attachEventListeners(newPost)
+                    },
+                    error: function(error) {
+                        console.log("ERROR:", error)
+                    }
+                })
+            })
+
+            //LOAD ALL POSTS INTO postListOld
             allPosts.forEach(post => {
                 postListOld.push(post)
             })
 
+            //ADD FRIENDS TO RIGHT SIDE
             friends.forEach(friend =>{
                 friendList.innerHTML += `
                     <li>${friend.firstName} ${friend.lastName}</li>
                 `
             })
 
+            //PROCESS ALL SAVED POSTS AND DISPLAY THEM
+            //ADD EVENTLISTENER TO THE COMMENT BUTTON
             allPosts.forEach(post => {
                 postComments = []
                 comments.forEach(comment => {
@@ -80,9 +86,8 @@ const loadOnce = () => {
                     'profilePic': post.profilePic
                 }
                 createPost(post, author, postComments, true)
+                attachEventListeners(post)
             })            
-            likeControl()
-            commentControl()
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -90,19 +95,23 @@ const loadOnce = () => {
     })
 }
 
-const likeControl = () => {
-    const likeUnlikeForms = [...document.getElementsByClassName("likeControl")]
-    likeUnlikeForms.forEach(form => form.addEventListener("submit", e => {
+function attachEventListeners(post) {
+    //ADD EVENT LISTENERS
+    const commentForm = document.getElementById(`commentForm-${post.id}`)
+    commentForm.addEventListener("submit", e => {
         e.preventDefault()
-        const clickedId = e.target.getAttribute('data-form-id')
-        const clickedButton = document.getElementById(`like-unlike-${clickedId}`)
-
+        createComment(post, commentForm)
+    })
+    const likeControl = document.getElementById(`likeControl-${post.id}`)
+    const clickedButton = document.getElementById(`like-unlike-${post.id}`)
+    likeControl.addEventListener("submit", e => {
+        e.preventDefault()
         $.ajax ({
             type: 'POST',
             url: "likeControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':clickedId,
+                'pk':post.id,
             },
             success: function(response) {
                 clickedButton.textContent = response.liked ? ` Unlike (${response.count})` : ` Like (${response.count})`
@@ -111,44 +120,33 @@ const likeControl = () => {
                 console.log("ERROR:", error)
             }
         })
-    }))
+    })
 }
 
-const commentControl = () => {
-    const commentForms = [...document.getElementsByClassName("commentControl")]    
-    commentForms.forEach(form => form.addEventListener("submit", e => {
-        e.preventDefault()
-        const clickedId = e.target.getAttribute('data-form-id')
-
-
-        const commentContainer = document.getElementById(clickedId)
-
-
-        const inputField = document.getElementById(`comment-${clickedId}`)
-        const commentBox = document.getElementById(`postComments-${clickedId}`)
+function createComment(post, ...args) {
+    if (post != ''){        
+        const inputField = document.getElementById(`comment-${post.id}`)
+        const commentContainer = document.getElementById(post.id)
         $.ajax ({
             type: 'POST',
             url: "commentControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':clickedId,
+                'pk':post.id,
                 'comment': inputField.value,
             },
             success: function(response) {
                 newCommentList = response.commentList
                 const newComment = document.createElement("div")
-                console.log("innerHTML", commentContainer.innerHTML)
                 newComment.style.cssText = "text-align:left"
                 newComment.innerHTML = `
-                        <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${response.profilePic}" height="35px" width="35px">      
+                        <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px" src="media/${response.profilePic}" height="35px" width="35px">      
                         <p style="overflow-wrap:anywhere;padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
                             <strong id="${response.id}">${response.commenter}</strong><br>${response.comment}
                         </p>
                 `
                 inputField.value = ''
-                commentContainer.appendChild(newComment)
-                console.log("innerHTML", commentContainer.innerHTML)
-
+                commentContainer.append(newComment)
                 commentListOld = []
                 newCommentList.forEach(comment =>{
                     commentListOld.push(comment)
@@ -157,9 +155,23 @@ const commentControl = () => {
             error: function(error) {
                 console.log("ERROR:", error)
             }
-        })
-    }))
+        })     
+    } else {
+        const newComment = document.createElement("div")
+        newComment.style.cssText = "text-align:left"
+        newComment.innerHTML = `
+                <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px"src="media/${args[0].profilePic}" height="35px" width="35px">      
+                <p style="overflow-wrap:anywhere;padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
+                    <strong id="${args[0].post}">${args[0].name}</strong><br>${args[0].comment}
+                </p>
+        `
+        const commentContainer = document.getElementById(args[0].post)
+        commentContainer.append(newComment)    
+    }           
 }
+
+
+
 
 function updateLikes(allPosts) {
     allPosts.forEach (post => {
@@ -180,13 +192,13 @@ $(document).ready(function(){
             type: 'GET',
             url: "/data/",
             success: function(response) {
-                
                 allPosts = response.allPosts
+                updateLikes(allPosts)
                 allPosts.forEach(post => {
                     const timeBox = document.getElementById(`timePosted-${post.id}`)
                     timeBox.innerText = getTimeElapsed(post)
                 })
-
+                
                 friends = response.friends
                 if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
                     allPosts.forEach(newPost => {
@@ -202,42 +214,18 @@ $(document).ready(function(){
                             }
                         } 
                     })
+
                     postListOld = []
                     allPosts.forEach(post => {
                         postListOld.push(post)
                     })
-                    updateLikes(allPosts)
                 }
-                if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
-                    friendListOld=friends
-                } 
-            },
-            error: function(error) {
-                console.log("ERROR:", error)
-            }
-        })
-    }, 5000)
-    setInterval(function(){
-        $.ajax ({
-            type: 'GET',
-            url: "/loadComments/",
-            success: function(response) {
-                
-                comments = response.comment
+                comments = response.comments
                 if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
                     comments.forEach(comment => {
                         if (commentListOld.findIndex((e) => e.id === comment.id) === -1){
                             if (!document.getElementById(`${comment.id}`)) {
-                                commentContainer = document.getElementById(`${comment.post}`)
-                                newComment = document.createElement('div')
-                                newComment.style.cssText = "text-align:left"
-                                newComment.innerHTML = `
-                                        <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${comment.profilePic}" height="35px" width="35px">      
-                                        <p style="overflow-wrap:anywhere;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
-                                            <strong id="${comment.id}">${comment.name}</strong><br>${comment.comment}
-                                        </p>
-                                `
-                                commentContainer.appendChild(newComment)
+                                createComment('', comment)
                             }
                         }
                     })
@@ -245,6 +233,9 @@ $(document).ready(function(){
                     comments.forEach(comment => {
                         commentListOld.push(comment)
                     })
+                } 
+                if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
+                    friendListOld=friends
                 } 
             },
             error: function(error) {
@@ -292,7 +283,7 @@ function createPost(post, author, postComments, load) {
             <p align="left" style="overflow-wrap: anywhere" class="postContent" data-id="${post.id}" id="postContent-${post.id}"><pre style="overflow-x:auto;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word" align="left">${post.content}</pre></p>
         </div>
         <div style="padding-top:5px;padding-bottom:5px;margin-left:25%;margin-right:25%;margin-top:10px;margin-bottom:10px" class="border-dark border-top border-bottom">
-                <form class="likeControl" data-form-id="${post.id}">
+                <form class="likeControl" id="likeControl-${post.id}" data-form-id="${post.id}">
                     <button href="#" class="btn btn-primary" >
                         <i id="like-unlike-${post.id}" class="fas fa-thumbs-up">
                             ${post.liked ? 
@@ -305,10 +296,10 @@ function createPost(post, author, postComments, load) {
             </div>
             <div class="commentContainer" id="${post.id}" data-id="${post.id}" data-container-id="${post.id}">
                 Comments:    
-                <p style="overflow-wrap: anywhere" class="postComment" data-id="${post.id}" id="postComments-${post.id}">${commentString}</p>
+                ${commentString}
             </div>
             <div>
-                <form class="commentControl" data-form-id="${post.id}">
+                <form id="commentForm-${post.id}" class="commentControl" data-form-id="${post.id}">
                     <input style="background:#DDE2E5" id="comment-${post.id}" name="comment" class="form-control" type="text" placeholder="Leave a comment">
                     <div class="input-group-btn">
                         <button style="margin-top:5px" class="btn btn-primary" type="submit" name="comment_submit">Comment</button>
@@ -323,8 +314,6 @@ function createPost(post, author, postComments, load) {
     else{
         postBox.appendChild(newPostBox)
     }
-    likeControl()
-    commentControl()
 }
 
 function getTimeElapsed(post) {
@@ -336,20 +325,37 @@ function getTimeElapsed(post) {
     if (!timeElasped) {
         timeElasped = 0
     }
-    if (timeElasped < 60){
+    if (timeElasped < 5) {
+        timePostedString = `Just Now`
+    }
+    else if (timeElasped < 60){
+        
         timePostedString = `${timeElasped} seconds ago`
     }
     else if (timeElasped >= 60 && timeElasped < 3600){
         timeElasped = Math.floor(timeElasped/60)
-        timePostedString = `${timeElasped} minutes ago`
+        if (timeElasped == 1) {
+            timePostedString = `${timeElasped} minute ago`
+        } else {
+            timePostedString = `${timeElasped} minutes ago`
+        }
+        
     }
     else if (timeElasped >= 3600 && timeElasped < 86400) {
         timeElasped = Math.floor(timeElasped / 3600)
-        timePostedString = `${timeElasped} hours ago`
+        if (timeElasped == 1) {
+            timePostedString = `${timeElasped} hour ago`
+        } else {
+            timePostedString = `${timeElasped} hours ago`
+        }
     }
     else if (timeElasped >= 86400) {
         timeElasped = Math.floor(timeElasped/86400)
-        timePostedString = `${timeElasped} days ago`
+        if (timeElasped == 1) {
+            timePostedString = `${timeElasped} day ago`
+        } else {
+            timePostedString = `${timeElasped} days ago`
+        }
     }
     return timePostedString
 }
