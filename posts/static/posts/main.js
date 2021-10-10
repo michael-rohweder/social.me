@@ -329,6 +329,7 @@ function createPost(post, author, postComments, load) {
         postBox.appendChild(newPostBox)
     }
     likeControl()
+    commentControl()
 }
 
 function getTimeElapsed(post) {
