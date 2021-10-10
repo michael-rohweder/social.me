@@ -186,6 +186,7 @@ $(document).ready(function(){
                     const timeBox = document.getElementById(`timePosted-${post.id}`)
                     timeBox.innerText = getTimeElapsed(post)
                 })
+
                 friends = response.friends
                 if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
                     allPosts.forEach(newPost => {
@@ -215,7 +216,7 @@ $(document).ready(function(){
                 console.log("ERROR:", error)
             }
         })
-    }, 1000)
+    }, 5000)
     setInterval(function(){
         $.ajax ({
             type: 'GET',
@@ -250,7 +251,7 @@ $(document).ready(function(){
                 console.log("ERROR:", error)
             }
         })
-    }, 1000)
+    }, 5000)
 })
 
 function createPost(post, author, postComments, load) {
