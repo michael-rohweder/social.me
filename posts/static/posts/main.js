@@ -141,7 +141,7 @@ const commentControl = () => {
                 newComment.style.cssText = "text-align:left"
                 newComment.innerHTML = `
                         <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${response.profilePic}" height="35px" width="35px">      
-                        <p style="padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
+                        <p style="overflow-wrap:anywhere;padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
                             <strong id="${response.id}">${response.commenter}</strong><br>${response.comment}
                         </p>
                 `
@@ -222,7 +222,7 @@ $(document).ready(function(){
                                 newComment.style.cssText = "text-align:left"
                                 newComment.innerHTML = `
                                         <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${comment.profilePic}" height="35px" width="35px">      
-                                        <p style="padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
+                                        <p style="overflow-wrap:anywhere;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
                                             <strong id="${comment.id}">${comment.name}</strong><br>${comment.comment}
                                         </p>
                                 `
@@ -269,7 +269,7 @@ function createPost(post, author, postComments, load) {
             commentString += `
             <div style="text-align:left">
                 <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${comment.profilePic}" height="35px" width="35px">      
-                    <p style="padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
+                    <p style="overflow-wrap:anywhere;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
                         <strong id="${comment.id}">${comment.name}</strong><br>${comment.comment}
                     </p>
             </div>
