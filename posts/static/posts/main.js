@@ -148,7 +148,11 @@ const commentControl = () => {
                 inputField.value = ''
                 commentContainer.appendChild(newComment)
                 console.log("innerHTML", commentContainer.innerHTML)
-                commentListOld = newCommentList
+
+                commentListOld = []
+                newCommentList.forEach(comment =>{
+                    commentListOld.push(comment)
+                })
             },
             error: function(error) {
                 console.log("ERROR:", error)
