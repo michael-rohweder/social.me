@@ -193,26 +193,17 @@ $(document).ready(function(){
             url: "/data/",
             success: function(response) {
                 allPosts = response.allPosts
-                updateLikes(allPosts)
-                allPosts.forEach(post => {
-                    const timeBox = document.getElementById(`timePosted-${post.id}`)
-                    timeBox.innerText = getTimeElapsed(post)
-                })
-                
-                friends = response.friends
                 if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
                     allPosts.forEach(newPost => {
-                        if (postListOld.findIndex((e) => e.id === newPost.id) === -1){
-                            if (!document.getElementById(`postBoxContainer-${newPost.id}`)){
-                                author = {
-                                    'name': newPost.name,
-                                    'firstName': newPost.authorFirstName,
-                                    'lastName': newPost.authorLastName,
-                                    'profilePic': newPost.profilePic
-                                }
-                                createPost(newPost, author, '', false)
+                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)){
+                            author = {
+                                'name': newPost.name,
+                                'firstName': newPost.authorFirstName,
+                                'lastName': newPost.authorLastName,
+                                'profilePic': newPost.profilePic
                             }
-                        } 
+                            createPost(newPost, author, '', false)
+                        }
                     })
 
                     postListOld = []
@@ -220,6 +211,14 @@ $(document).ready(function(){
                         postListOld.push(post)
                     })
                 }
+                allPosts.forEach(post => {
+                    const timeBox = document.getElementById(`timePosted-${post.id}`)
+                    timeBox.innerText = getTimeElapsed(post)
+                })
+                
+                friends = response.friends
+
+                
                 comments = response.comments
                 if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
                     comments.forEach(comment => {
@@ -237,6 +236,8 @@ $(document).ready(function(){
                 if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
                     friendListOld=friends
                 } 
+                updateLikes(allPosts)
+
             },
             error: function(error) {
                 console.log("ERROR:", error)
