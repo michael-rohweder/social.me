@@ -140,7 +140,7 @@ function createComment(post, ...args) {
                 const newComment = document.createElement("div")
                 newComment.style.cssText = "text-align:left"
                 newComment.innerHTML = `
-                        <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px" src="media/${response.profilePic}" height="35px" width="35px">      
+                        <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px" src="${response.profilePic}" height="35px" width="35px">      
                         <p style="overflow-wrap:anywhere;padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
                             <strong id="${response.id}">${response.commenter}</strong><br>${response.comment}
                         </p>
@@ -160,7 +160,7 @@ function createComment(post, ...args) {
         const newComment = document.createElement("div")
         newComment.style.cssText = "text-align:left"
         newComment.innerHTML = `
-                <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px"src="media/${args[0].profilePic}" height="35px" width="35px">      
+                <img align="left" class="rounded-circle postAuthorProfileImage" style="margin-right:5px"src="${args[0].profilePic}" height="35px" width="35px">      
                 <p style="overflow-wrap:anywhere;padding-top:5px; padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5; border-radius:0px 25px 25px 25px">
                     <strong id="${args[0].post}">${args[0].name}</strong><br>${args[0].comment}
                 </p>
@@ -193,6 +193,9 @@ $(document).ready(function(){
             url: "/data/",
             success: function(response) {
                 allPosts = response.allPosts
+                friends = response.friends
+                comments = response.comments
+                
                 if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
                     allPosts.forEach(newPost => {
                         if (!document.getElementById(`postBoxContainer-${newPost.id}`)){
@@ -216,10 +219,7 @@ $(document).ready(function(){
                     timeBox.innerText = getTimeElapsed(post)
                 })
                 
-                friends = response.friends
-
                 
-                comments = response.comments
                 if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
                     comments.forEach(comment => {
                         if (commentListOld.findIndex((e) => e.id === comment.id) === -1){
@@ -255,7 +255,7 @@ function createPost(post, author, postComments, load) {
         postComments.slice().reverse().forEach(comment => {
             commentString += `
             <div style="text-align:left">
-                <img align="left" class="rounded-circle postAuthorProfileImage" src="media/${comment.profilePic}" height="35px" width="35px">      
+                <img align="left" class="rounded-circle postAuthorProfileImage" src="${comment.profilePic}" height="35px" width="35px">      
                     <p style="overflow-wrap:anywhere;padding-top:5px;padding-bottom:5px;padding-left:10px;padding-right:10px;display:inline-block;width:auto;background:#dde2e5;margin-left:5px; border-radius:0px 20px 20px 20px;border-collapse:separate">
                         <strong id="${comment.id}">${comment.name}</strong><br>${comment.comment}
                     </p>
@@ -268,7 +268,7 @@ function createPost(post, author, postComments, load) {
         <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#ffffff;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
         <div>
             <p align="left">
-                <img style="margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="media/${author.profilePic}" height="50px" width="50px">
+                <img style="margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="${post.profilePic}" height="50px" width="50px">
                 <p align="left" style="margin-left:5px">
                     <strong data-id="${post.id}" class="postAuthorName" id="postAuthorName-${post.id}">
                         ${author.name}

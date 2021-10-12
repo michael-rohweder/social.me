@@ -30,7 +30,7 @@ def postControl(request):
             }
             newPostAuthorJSON = {
                 'name': postCreator.firstName + " " + postCreator.lastName,
-                'profilePic': str(postCreator.profilePic),
+                'profilePic': str(postCreator.profilePic.url),
                 'firstName': postCreator.firstName,
                 'lastName': postCreator.lastName
             }
@@ -60,7 +60,7 @@ def loadData(request):
             'post': comment.post.id,
             'commenter': comment.commenter.id,
             'name': comment.commenter.firstName + " " + comment.commenter.lastName,
-            'profilePic': str(comment.commenter.profilePic)
+            'profilePic': str(comment.commenter.profilePic.url)
         }
         allCommentsListJSON.append(com)
     
@@ -74,7 +74,7 @@ def loadData(request):
             'author': post.author.user.username,
             'authorFirstName': post.author.firstName,
             'authorLastName': post.author.lastName,
-            'profilePic': str(post.author.profilePic),
+            'profilePic': str(post.author.profilePic.url),
             'liked': True if request.user in post.liked.all() else False,
             'count': post.likeCount,
             'name': full_name,
@@ -85,7 +85,7 @@ def loadData(request):
         'id': currentUserProfile.id,
         'firstName': currentUserProfile.firstName,
         'lastName': currentUserProfile.lastName,
-        'profilePic': str(currentUserProfile.profilePic)
+        'profilePic': str(currentUserProfile.profilePic.url)
     }
     return JsonResponse({'currentUser': currentUserProfileJSON, 'allPosts': allPostListJSON, 'friends': friendsJSON, 'comments': allCommentsListJSON})
 
@@ -112,7 +112,7 @@ def loadComments(request):
                 'comment': comment.comment,
                 'post': comment.post.id,
                 'name': commenterName,
-                'profilePic':str(comment.commenter.profilePic)
+                'profilePic':str(comment.commenter.profilePic.url)
             }
             commentList.append(commentDict)
         return JsonResponse({'comment': commentList})
@@ -135,13 +135,13 @@ def commentControl(request):
                 'comment': commentOBJ.comment,
                 'post': commentOBJ.post.id,
                 'commenter': commentOBJ.commenter.user.id,
-                'profilePic': str(commentOBJ.commenter.profilePic)
+                'profilePic': str(commentOBJ.commenter.profilePic.url)
             }
             commentList.append(com)
         if comment.comment != '':
             comment.save()
             print("commentControll Called!")
-            return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic)})
+            return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.url)})
 
 
 

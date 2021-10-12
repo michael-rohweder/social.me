@@ -20,6 +20,8 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import logout_then_login
 from . import views
 
+admin.autodiscover()
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/', views.signup, name='signup'),
