@@ -141,7 +141,7 @@ def commentControl(request):
         if comment.comment != '':
             comment.save()
             print("commentControll Called!")
-            return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.url)})
+            return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic.url)})
 
 
 

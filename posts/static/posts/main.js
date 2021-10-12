@@ -166,6 +166,7 @@ function createComment(post, ...args) {
                 </p>
         `
         const commentContainer = document.getElementById(args[0].post)
+        inputField.value = ''
         commentContainer.append(newComment)    
     }           
 }
