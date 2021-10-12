@@ -268,7 +268,7 @@ function createPost(post, author, postComments, load) {
         <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#ffffff;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
         <div>
             <p align="left">
-                <img style="margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="${post.profilePic}" height="50px" width="50px">
+                <img style="margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="${author.profilePic}" height="50px" width="50px">
                 <p align="left" style="margin-left:5px">
                     <strong data-id="${post.id}" class="postAuthorName" id="postAuthorName-${post.id}">
                         ${author.name}
