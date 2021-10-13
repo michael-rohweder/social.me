@@ -35,17 +35,27 @@ const loadOnce = () => {
             //POST BOX EVENTLISTENER
             const postForm = document.getElementById('postSubmit')
             const postInput = document.getElementById('postInput')
+            const postImage = document.getElementById('postImageUpload')
             postForm.addEventListener("submit", e => {
                 e.preventDefault()
+                
+                var formData = new FormData()
+
+                if ($(postImage).prop('files').length > 0){
+                    file = $(postImage).prop('files')[0]
+                    formData.append('postedImage', file)
+                }
+                formData.append('csrfmiddlewaretoken', csrftoken)
+                formData.append('postContent', postInput.value)
                 $.ajax ({
                     type: 'POST',
                     url: 'postControl/',
-                    data: {
-                        'csrfmiddlewaretoken': csrftoken,
-                        'postContent': postInput.value
-                    },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
                     success: function(response) {
                         postInput.value = ''
+                        postImage.value = ''
                         postInput.style.height="50px"
                         newPost = response.post
                         author = response.author
@@ -283,6 +293,10 @@ function createPost(post, author, postComments, load) {
         </div>
         <div>
             <p align="left" style="overflow-wrap: anywhere" class="postContent" data-id="${post.id}" id="postContent-${post.id}"><pre style="overflow-x:auto;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word" align="left">${post.content}</pre></p>
+            
+            <div style="width:100%; height:auto">
+                <a href="${post.postImage}"><img id="image-${post.id}" width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
+            </div>
         </div>
         <div style="padding-top:5px;padding-bottom:5px;margin-left:25%;margin-right:25%;margin-top:10px;margin-bottom:10px" class="border-dark border-top border-bottom">
                 <form class="likeControl" id="likeControl-${post.id}" data-form-id="${post.id}">

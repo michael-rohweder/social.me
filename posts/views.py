@@ -15,18 +15,28 @@ def index(request):
 def postControl(request):
     form = PostForm
     if request.is_ajax():
+        postImage = request.FILES.get('postedImage')
         postContent = request.POST.get('postContent')
+        
         if postContent != '':
             postCreator = Profile.objects.get(user=request.user)
             newPost = Post()
+            newPost.image = postImage
             newPost.author = postCreator
             newPost.content = postContent
             newPost.save()
+            print("POSTIMAGE PASSED:", postImage)
+            if (postImage != None):
+                postImageURL = newPost.image.url
+
+            else:
+                postImageURL = '/'
             newPostJSON = {
                 'id': newPost.id,
                 'author': newPost.author.id,
                 'content': newPost.content,
-                'count': newPost.likeCount
+                'count': newPost.likeCount,
+                'postImage': postImageURL,
             }
             newPostAuthorJSON = {
                 'name': postCreator.firstName + " " + postCreator.lastName,
@@ -68,6 +78,10 @@ def loadData(request):
     allPostListJSON = []
     for post in allPosts:
         full_name = post.author.firstName + " " + post.author.lastName
+        if (post.image):
+            postImage = str(post.image.url)
+        else:
+            postImage = ''
         item = {
             'id': post.id,
             'content': post.content,
@@ -78,7 +92,8 @@ def loadData(request):
             'liked': True if request.user in post.liked.all() else False,
             'count': post.likeCount,
             'name': full_name,
-            'created': post.created
+            'created': post.created,
+            'postImage': postImage
         }
         allPostListJSON.append(item)
     currentUserProfileJSON = {

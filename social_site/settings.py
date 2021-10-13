@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os
 import django_heroku
+from decouple import config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)u*0s21x+=2g22zzqlme36himm@!mhw^qdk9l-q+(#jr2qokiv'
+SECRET_KEY = config('secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -123,8 +124,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-AWS_ACCESS_KEY_ID = 'AKIARR4KFXBDNWLF7TJ6'
-AWS_SECRET_ACCESS_KEY = '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'
+AWS_ACCESS_KEY_ID = config('aws_access_key_id')
+AWS_SECRET_ACCESS_KEY = config('aws_secret_access_key')
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_STORAGE_BUCKET_NAME = 'social-me-static'
