@@ -5,7 +5,6 @@ from .views import (
     loadData,
     likeControl,
     commentControl,
-    loadComments,
     postControl,
 )
 
@@ -15,7 +14,6 @@ urlpatterns = [
     path('', index, name='main'),
     path('data/', loadData, name='posts-data'),
     path('likeControl/', likeControl, name="likeControl"),
-    path('loadComments/', loadComments, name='loadComments'),
     path('commentControl/', commentControl, name="commentControl"),
     path('postControl/', postControl, name="postControl")
 ]

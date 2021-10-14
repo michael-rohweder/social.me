@@ -181,9 +181,6 @@ function createComment(post, ...args) {
     }           
 }
 
-
-
-
 function updateLikes(allPosts) {
     allPosts.forEach (post => {
         const likeContainer = document.getElementById(`like-unlike-${post.id}`)

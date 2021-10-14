@@ -116,22 +116,6 @@ def likeControl(request):
             post.liked.add(request.user)
         return JsonResponse({'liked': liked, 'count': post.likeCount})
 
-def loadComments(request):
-    if request.is_ajax():
-        comments = Comments.objects.all().order_by('created')
-        commentList = []
-        for comment in comments:
-            commenterName = comment.commenter.firstName + " " + comment.commenter.lastName
-            commentDict = {
-                'id': comment.id,
-                'comment': comment.comment,
-                'post': comment.post.id,
-                'name': commenterName,
-                'profilePic':str(comment.commenter.profilePic.url)
-            }
-            commentList.append(commentDict)
-        return JsonResponse({'comment': commentList})
-
 def commentControl(request):
     if request.is_ajax():
         pk = request.POST.get('pk')
@@ -157,13 +141,3 @@ def commentControl(request):
             comment.save()
             print("commentControll Called!")
             return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic.url)})
-
-
-
-
-
-
-
-
-
-
