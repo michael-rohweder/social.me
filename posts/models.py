@@ -16,9 +16,7 @@ class Post(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return str(self.content)
-
-    
+        return str(self.content)    
 
     @property
     def likeCount(self):
