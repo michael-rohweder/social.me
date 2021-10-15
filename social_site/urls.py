@@ -18,6 +18,8 @@ from django.urls import path,  include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth.views import logout_then_login
+
+from posts.views import editPost
 from . import views
 
 admin.autodiscover()
@@ -25,9 +27,11 @@ admin.autodiscover()
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('signup/', views.signup, name='signup'),
+    
+    path('login/', views.Login, name='login'),
     path('', include('posts.urls', namespace='post')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('userProfile', views.userProfile, name='userProfile')
+    path('userProfile/', views.userProfile, name='userProfile')
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

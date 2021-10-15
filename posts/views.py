@@ -1,3 +1,4 @@
+from json.encoder import JSONEncoder
 from django.shortcuts import render
 
 from social_site.views import Login
@@ -11,16 +12,24 @@ from profiles.models import Profile
 
 @login_required(login_url='login')
 def index(request):
-    return render(request, 'posts/main.html')
+    form = PostForm
+    return render(request, 'posts/main.html', {'form': form})
 
+
+def editPost(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            return JsonResponse({'message': 'This is your post!'})
+        else:
+            return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
 
 def postControl(request):
-    form = PostForm
     if request.is_ajax():
         postImage = request.FILES.get('postedImage')
         postContent = request.POST.get('postContent')
 
-        if postContent != '':
+        if postContent != '' or postImage != None:
             postCreator = Profile.objects.get(user=request.user)
             newPost = Post()
             newPost.image = postImage
