@@ -6,7 +6,7 @@ const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        for (let i=0; i < cookies.length; i++){
+        for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === (name + "=")) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
@@ -24,7 +24,6 @@ const loadOnce = () => {
         url: '/data/',
         success: function(response) {
             const allPosts = response.allPosts
-            const currentUser = response.currentUser
             const friends = response.friends
             const comments = response.comments
             var postComments = []
@@ -33,34 +32,63 @@ const loadOnce = () => {
             commentListOld = comments
 
             //POST BOX EVENTLISTENER
-            const postForm = document.getElementById('postSubmit')
-            const postInput = document.getElementById('postInput')
-            const postImage = document.getElementById('postImageUpload')
-            postForm.addEventListener("submit", e => {
+            const postSave = document.getElementById('post_save')
+            const postInput = document.getElementById('id_content')
+            const postImage = document.getElementById('id_image')
+            const errorMessage = document.getElementById('error_message')
+            const postCancel = document.getElementById('post_cancel')
+            const createPostDiv = document.getElementById('createPostDiv')
+            const createPostButton = document.getElementById('createPostButton')
+            createPostDiv.addEventListener('click', e => {
                 e.preventDefault()
-                
+                createPostButton.click()
+            })
+            postCancel.addEventListener("click", e => {
+                e.preventDefault()
+                postInput.value = ''
+                postImage.value = ''
+                errorMessage.innerText = ''
+                $('#addPostModal').modal('hide')
+            })
+            postSave.addEventListener("click", e => {
+                e.preventDefault()
+                if (postInput.value != '' || $(postImage).prop('files').length > 0) {
+                    errorMessage.innerText = ''
+                    console.log("Post Submit")
+
+                    postSave.innerHTML = `
+                        <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `
+                } else {
+                    errorMessage.innerText = "Please enter either text or an image!"
+                }
                 var formData = new FormData()
 
-                if ($(postImage).prop('files').length > 0){
+                if ($(postImage).prop('files').length > 0) {
                     file = $(postImage).prop('files')[0]
                     formData.append('postedImage', file)
                 }
                 formData.append('csrfmiddlewaretoken', csrftoken)
                 formData.append('postContent', postInput.value)
-                $.ajax ({
+                $.ajax({
                     type: 'POST',
                     url: 'postControl/',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        errorMessage.innerText = ''
+                        postSave.innerHTML = "Save Post"
                         postInput.value = ''
                         postImage.value = ''
-                        postInput.style.height="50px"
+                        postInput.style.height = "50px"
                         newPost = response.post
                         author = response.author
                         createPost(newPost, author, '', false)
                         attachEventListeners(newPost)
+                        $('#addPostModal').modal('hide')
                     },
                     error: function(error) {
                         console.log("ERROR:", error)
@@ -74,7 +102,7 @@ const loadOnce = () => {
             })
 
             //ADD FRIENDS TO RIGHT SIDE
-            friends.forEach(friend =>{
+            friends.forEach(friend => {
                 friendList.innerHTML += `
                     <li>${friend.firstName} ${friend.lastName}</li>
                 `
@@ -97,7 +125,7 @@ const loadOnce = () => {
                 }
                 createPost(post, author, postComments, true)
                 attachEventListeners(post)
-            })            
+            })
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -116,12 +144,12 @@ function attachEventListeners(post) {
     const clickedButton = document.getElementById(`like-unlike-${post.id}`)
     likeControl.addEventListener("submit", e => {
         e.preventDefault()
-        $.ajax ({
+        $.ajax({
             type: 'POST',
             url: "likeControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':post.id,
+                'pk': post.id,
             },
             success: function(response) {
                 clickedButton.textContent = response.liked ? ` Unlike (${response.count})` : ` Like (${response.count})`
@@ -134,15 +162,15 @@ function attachEventListeners(post) {
 }
 
 function createComment(post, ...args) {
-    if (post != ''){        
+    if (post != '') {
         const inputField = document.getElementById(`comment-${post.id}`)
         const commentContainer = document.getElementById(post.id)
-        $.ajax ({
+        $.ajax({
             type: 'POST',
             url: "commentControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':post.id,
+                'pk': post.id,
                 'comment': inputField.value,
             },
             success: function(response) {
@@ -158,14 +186,14 @@ function createComment(post, ...args) {
                 inputField.value = ''
                 commentContainer.append(newComment)
                 commentListOld = []
-                newCommentList.forEach(comment =>{
+                newCommentList.forEach(comment => {
                     commentListOld.push(comment)
                 })
             },
             error: function(error) {
                 console.log("ERROR:", error)
             }
-        })     
+        })
     } else {
         const newComment = document.createElement("div")
         newComment.style.cssText = "text-align:left"
@@ -177,14 +205,14 @@ function createComment(post, ...args) {
         `
         const commentContainer = document.getElementById(args[0].post)
         inputField.value = ''
-        commentContainer.append(newComment)    
-    }           
+        commentContainer.append(newComment)
+    }
 }
 
 function updateLikes(allPosts) {
-    allPosts.forEach (post => {
+    allPosts.forEach(post => {
         const likeContainer = document.getElementById(`like-unlike-${post.id}`)
-        if (post.liked){
+        if (post.liked) {
             likeString = ` Unlike (${post.count})`
         } else {
             likeString = ` Like (${post.count})`
@@ -194,19 +222,19 @@ function updateLikes(allPosts) {
 
 }
 
-$(document).ready(function(){
-    setInterval(function(){
-        $.ajax ({
+$(document).ready(function() {
+    setInterval(function() {
+        $.ajax({
             type: 'GET',
             url: "/data/",
             success: function(response) {
                 allPosts = response.allPosts
                 friends = response.friends
                 comments = response.comments
-                
-                if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
+
+                if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
                     allPosts.forEach(newPost => {
-                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)){
+                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
                             author = {
                                 'name': newPost.name,
                                 'firstName': newPost.authorFirstName,
@@ -226,11 +254,11 @@ $(document).ready(function(){
                     const timeBox = document.getElementById(`timePosted-${post.id}`)
                     timeBox.innerText = getTimeElapsed(post)
                 })
-                
-                
-                if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
+
+
+                if (JSON.stringify(comments) != JSON.stringify(commentListOld)) {
                     comments.forEach(comment => {
-                        if (commentListOld.findIndex((e) => e.id === comment.id) === -1){
+                        if (commentListOld.findIndex((e) => e.id === comment.id) === -1) {
                             if (!document.getElementById(`${comment.id}`)) {
                                 createComment('', comment)
                             }
@@ -240,10 +268,10 @@ $(document).ready(function(){
                     comments.forEach(comment => {
                         commentListOld.push(comment)
                     })
-                } 
-                if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
-                    friendListOld=friends
-                } 
+                }
+                if (JSON.stringify(friends) != JSON.stringify(friendListOld)) {
+                    friendListOld = friends
+                }
                 updateLikes(allPosts)
 
             },
@@ -259,7 +287,7 @@ function createPost(post, author, postComments, load) {
     var timePostedString = getTimeElapsed(post)
 
     commentString = ''
-    if (postComments != ''){
+    if (postComments != '') {
         postComments.slice().reverse().forEach(comment => {
             commentString += `
             <div style="text-align:left">
@@ -374,4 +402,3 @@ function getTimeElapsed(post) {
 }
 
 loadOnce()
-
