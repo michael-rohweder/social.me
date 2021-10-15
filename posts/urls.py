@@ -5,8 +5,8 @@ from .views import (
     loadData,
     likeControl,
     commentControl,
-    loadComments,
     postControl,
+    editPost,
 )
 
 app_name = 'posts'
@@ -15,7 +15,7 @@ urlpatterns = [
     path('', index, name='main'),
     path('data/', loadData, name='posts-data'),
     path('likeControl/', likeControl, name="likeControl"),
-    path('loadComments/', loadComments, name='loadComments'),
+    path('editPost/', editPost, name='editPost'),
     path('commentControl/', commentControl, name="commentControl"),
     path('postControl/', postControl, name="postControl")
 ]

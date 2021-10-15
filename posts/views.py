@@ -1,3 +1,4 @@
+from json.encoder import JSONEncoder
 from django.shortcuts import render
 
 from social_site.views import Login
@@ -8,24 +9,45 @@ from .forms import PostForm
 from profiles.models import Profile
 # Create your views here.
 
+
 @login_required(login_url='login')
 def index(request):
-    return render(request, 'posts/main.html')
-    
+    postForm = PostForm
+    return render(request, 'posts/main.html', {'postForm': postForm})
+
+
+def editPost(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            if (post.image):
+                postImage = str(post.image.url)
+            else:
+                postImage = ''
+            clickedPost = {
+                'id': post.id,
+                'content': post.content,
+                'author': post.author.id,
+                'count': post.likeCount,
+                'postImage': postImage
+
+            }
+            return JsonResponse({'message': 'This is your post!', 'post': clickedPost})
+        else:
+            return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
+
 def postControl(request):
-    form = PostForm
     if request.is_ajax():
         postImage = request.FILES.get('postedImage')
         postContent = request.POST.get('postContent')
-        
-        if postContent != '':
+
+        if postContent != '' or postImage != None:
             postCreator = Profile.objects.get(user=request.user)
             newPost = Post()
             newPost.image = postImage
             newPost.author = postCreator
             newPost.content = postContent
             newPost.save()
-            print("POSTIMAGE PASSED:", postImage)
             if (postImage != None):
                 postImageURL = newPost.image.url
 
@@ -46,11 +68,12 @@ def postControl(request):
             }
             return JsonResponse({'post': newPostJSON, 'author': newPostAuthorJSON})
 
+
 def loadData(request):
     currentUser = request.user
     currentUserProfile = Profile.objects.get(user=currentUser)
     currentUserFriends = currentUserProfile.friends.all()
-    
+
     friendsJSON = []
     for frnd in currentUserFriends:
         friendOBJ = Profile.objects.get(id=frnd.id)
@@ -60,7 +83,7 @@ def loadData(request):
             'lastName': friendOBJ.lastName,
         }
         friendsJSON.append(friend)
-    
+
     allComments = Comments.objects.all().order_by('-created')
     allCommentsListJSON = []
     for comment in allComments:
@@ -73,7 +96,7 @@ def loadData(request):
             'profilePic': str(comment.commenter.profilePic.url)
         }
         allCommentsListJSON.append(com)
-    
+
     allPosts = Post.objects.all().order_by('-created')
     allPostListJSON = []
     for post in allPosts:
@@ -104,33 +127,19 @@ def loadData(request):
     }
     return JsonResponse({'currentUser': currentUserProfileJSON, 'allPosts': allPostListJSON, 'friends': friendsJSON, 'comments': allCommentsListJSON})
 
+
 def likeControl(request):
     if request.is_ajax():
         pk = request.POST.get('pk')
         post = Post.objects.get(id=pk)
         if request.user in post.liked.all():
-            liked=False
+            liked = False
             post.liked.remove(request.user)
         else:
-            liked=True
+            liked = True
             post.liked.add(request.user)
         return JsonResponse({'liked': liked, 'count': post.likeCount})
 
-def loadComments(request):
-    if request.is_ajax():
-        comments = Comments.objects.all().order_by('created')
-        commentList = []
-        for comment in comments:
-            commenterName = comment.commenter.firstName + " " + comment.commenter.lastName
-            commentDict = {
-                'id': comment.id,
-                'comment': comment.comment,
-                'post': comment.post.id,
-                'name': commenterName,
-                'profilePic':str(comment.commenter.profilePic.url)
-            }
-            commentList.append(commentDict)
-        return JsonResponse({'comment': commentList})
 
 def commentControl(request):
     if request.is_ajax():
@@ -157,13 +166,3 @@ def commentControl(request):
             comment.save()
             print("commentControll Called!")
             return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic.url)})
-
-
-
-
-
-
-
-
-
-

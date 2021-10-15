@@ -6,7 +6,7 @@ const getCookie = (name) => {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        for (let i=0; i < cookies.length; i++){
+        for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === (name + "=")) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
@@ -24,7 +24,6 @@ const loadOnce = () => {
         url: '/data/',
         success: function(response) {
             const allPosts = response.allPosts
-            const currentUser = response.currentUser
             const friends = response.friends
             const comments = response.comments
             var postComments = []
@@ -32,35 +31,72 @@ const loadOnce = () => {
             friendListOld = friends
             commentListOld = comments
 
+            
+
             //POST BOX EVENTLISTENER
-            const postForm = document.getElementById('postSubmit')
-            const postInput = document.getElementById('postInput')
-            const postImage = document.getElementById('postImageUpload')
-            postForm.addEventListener("submit", e => {
+            const postSave = document.getElementById('post_save')
+            const postInput = document.getElementById('id_content')
+            const postImage = document.getElementById('id_image')
+            const errorMessage = document.getElementById('error_message')
+            const postCancel = document.getElementById('post_cancel')
+            const createPostDiv = document.getElementById('createPostDiv')
+            const createPostButton = document.getElementById('createPostButton')
+            const editPostButton = document.getElementById('editPostButton')
+            const searchForm = document.getElementById('searchForm')
+            searchForm.addEventListener('submit', e => {
                 e.preventDefault()
-                
+                alert("This feature is coming soon!")
+            })
+
+            createPostDiv.addEventListener('click', e => {
+                e.preventDefault()
+                createPostButton.click()
+            })
+            postCancel.addEventListener("click", e => {
+                e.preventDefault()
+                postInput.value = ''
+                postImage.value = ''
+                errorMessage.innerText = ''
+                $('#postModal').modal('hide')
+            })
+            postSave.addEventListener("click", e => {
+                e.preventDefault()
+                if (postInput.value != '' || $(postImage).prop('files').length > 0) {
+                    errorMessage.innerText = ''
+
+                    postSave.innerHTML = `
+                        <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                        </div>
+                    `
+                } else {
+                    errorMessage.innerText = "Please enter either text or an image!"
+                }
                 var formData = new FormData()
 
-                if ($(postImage).prop('files').length > 0){
+                if ($(postImage).prop('files').length > 0) {
                     file = $(postImage).prop('files')[0]
                     formData.append('postedImage', file)
                 }
                 formData.append('csrfmiddlewaretoken', csrftoken)
                 formData.append('postContent', postInput.value)
-                $.ajax ({
+                $.ajax({
                     type: 'POST',
                     url: 'postControl/',
                     data: formData,
                     processData: false,
                     contentType: false,
                     success: function(response) {
+                        errorMessage.innerText = ''
+                        postSave.innerHTML = "Save Post"
                         postInput.value = ''
                         postImage.value = ''
-                        postInput.style.height="50px"
+                        postInput.style.height = "50px"
                         newPost = response.post
                         author = response.author
                         createPost(newPost, author, '', false)
                         attachEventListeners(newPost)
+                        $('#postModal').modal('hide')
                     },
                     error: function(error) {
                         console.log("ERROR:", error)
@@ -74,7 +110,7 @@ const loadOnce = () => {
             })
 
             //ADD FRIENDS TO RIGHT SIDE
-            friends.forEach(friend =>{
+            friends.forEach(friend => {
                 friendList.innerHTML += `
                     <li>${friend.firstName} ${friend.lastName}</li>
                 `
@@ -97,7 +133,7 @@ const loadOnce = () => {
                 }
                 createPost(post, author, postComments, true)
                 attachEventListeners(post)
-            })            
+            })
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -107,7 +143,38 @@ const loadOnce = () => {
 
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
+    
+    const elipsesPost = document.getElementById(`elipses-${post.id}`)
     const commentForm = document.getElementById(`commentForm-${post.id}`)
+    const postSave = document.getElementById('post_save')
+    const postInput = document.getElementById('id_content')
+    const postImage = document.getElementById('id_image')
+    const errorMessage = document.getElementById('error_message')
+    const postCancel = document.getElementById('post_cancel')
+    const editPostButton = document.getElementById('editPostButton')
+
+    elipsesPost.addEventListener("click", e => {
+        e.preventDefault()
+        $.ajax({
+            type: "POST",
+            url: "editPost/",
+            data: {
+                'csrfmiddlewaretoken': csrftoken,
+                'pk': post.id
+            },
+            success: function(response) {
+                message = response.message
+                post = response.post
+                postInput.value = post.content
+                postImage.value = post.postImage
+                editPostButton.click()
+            },
+            error: function(error) {
+                console.log("ERROR:", error)
+            }
+        })
+    })
+
     commentForm.addEventListener("submit", e => {
         e.preventDefault()
         createComment(post, commentForm)
@@ -116,12 +183,12 @@ function attachEventListeners(post) {
     const clickedButton = document.getElementById(`like-unlike-${post.id}`)
     likeControl.addEventListener("submit", e => {
         e.preventDefault()
-        $.ajax ({
+        $.ajax({
             type: 'POST',
             url: "likeControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':post.id,
+                'pk': post.id,
             },
             success: function(response) {
                 clickedButton.textContent = response.liked ? ` Unlike (${response.count})` : ` Like (${response.count})`
@@ -134,15 +201,15 @@ function attachEventListeners(post) {
 }
 
 function createComment(post, ...args) {
-    if (post != ''){        
+    if (post != '') {
         const inputField = document.getElementById(`comment-${post.id}`)
         const commentContainer = document.getElementById(post.id)
-        $.ajax ({
+        $.ajax({
             type: 'POST',
             url: "commentControl/",
             data: {
                 'csrfmiddlewaretoken': csrftoken,
-                'pk':post.id,
+                'pk': post.id,
                 'comment': inputField.value,
             },
             success: function(response) {
@@ -158,14 +225,14 @@ function createComment(post, ...args) {
                 inputField.value = ''
                 commentContainer.append(newComment)
                 commentListOld = []
-                newCommentList.forEach(comment =>{
+                newCommentList.forEach(comment => {
                     commentListOld.push(comment)
                 })
             },
             error: function(error) {
                 console.log("ERROR:", error)
             }
-        })     
+        })
     } else {
         const newComment = document.createElement("div")
         newComment.style.cssText = "text-align:left"
@@ -177,17 +244,14 @@ function createComment(post, ...args) {
         `
         const commentContainer = document.getElementById(args[0].post)
         inputField.value = ''
-        commentContainer.append(newComment)    
-    }           
+        commentContainer.append(newComment)
+    }
 }
 
-
-
-
 function updateLikes(allPosts) {
-    allPosts.forEach (post => {
+    allPosts.forEach(post => {
         const likeContainer = document.getElementById(`like-unlike-${post.id}`)
-        if (post.liked){
+        if (post.liked) {
             likeString = ` Unlike (${post.count})`
         } else {
             likeString = ` Like (${post.count})`
@@ -197,19 +261,19 @@ function updateLikes(allPosts) {
 
 }
 
-$(document).ready(function(){
-    setInterval(function(){
-        $.ajax ({
+$(document).ready(function() {
+    setInterval(function() {
+        $.ajax({
             type: 'GET',
             url: "/data/",
             success: function(response) {
                 allPosts = response.allPosts
                 friends = response.friends
                 comments = response.comments
-                
-                if (JSON.stringify(allPosts)!=JSON.stringify(postListOld)){
+
+                if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
                     allPosts.forEach(newPost => {
-                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)){
+                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
                             author = {
                                 'name': newPost.name,
                                 'firstName': newPost.authorFirstName,
@@ -229,11 +293,11 @@ $(document).ready(function(){
                     const timeBox = document.getElementById(`timePosted-${post.id}`)
                     timeBox.innerText = getTimeElapsed(post)
                 })
-                
-                
-                if (JSON.stringify(comments)!=JSON.stringify(commentListOld)){
+
+
+                if (JSON.stringify(comments) != JSON.stringify(commentListOld)) {
                     comments.forEach(comment => {
-                        if (commentListOld.findIndex((e) => e.id === comment.id) === -1){
+                        if (commentListOld.findIndex((e) => e.id === comment.id) === -1) {
                             if (!document.getElementById(`${comment.id}`)) {
                                 createComment('', comment)
                             }
@@ -243,10 +307,10 @@ $(document).ready(function(){
                     comments.forEach(comment => {
                         commentListOld.push(comment)
                     })
-                } 
-                if (JSON.stringify(friends)!=JSON.stringify(friendListOld)){
-                    friendListOld=friends
-                } 
+                }
+                if (JSON.stringify(friends) != JSON.stringify(friendListOld)) {
+                    friendListOld = friends
+                }
                 updateLikes(allPosts)
 
             },
@@ -262,8 +326,9 @@ function createPost(post, author, postComments, load) {
     var timePostedString = getTimeElapsed(post)
 
     commentString = ''
-    if (postComments != ''){
+    if (postComments != '') {
         postComments.slice().reverse().forEach(comment => {
+            timeCommentString = getTimeElapsed(comment)
             commentString += `
             <div style="text-align:left">
                 <img align="left" class="rounded-circle postAuthorProfileImage" src="${comment.profilePic}" height="35px" width="35px">      
@@ -275,54 +340,69 @@ function createPost(post, author, postComments, load) {
         })
     }
     newPostBox.innerHTML = `
-    <div class="postBoxContainer" data-id="${post.id}" id="postBoxContainer-${post.id}" style="margin-left:5px;margin-right:5px">
+    <div class="postBoxContainer text-start mx-auto" data-id="${post.id}" id="postBoxContainer-${post.id}" style="padding-left:15px;padding-right:15px;max-width:680px">
         <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#ffffff;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
-        <div>
-            <p align="left">
-                <img style="margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="${author.profilePic}" height="50px" width="50px">
-                <p align="left" style="margin-left:5px">
-                    <strong data-id="${post.id}" class="postAuthorName" id="postAuthorName-${post.id}">
-                        ${author.name}
-                    </strong>
-                    <br>
-                    <small id="timePosted-${post.id}">
-                        ${timePostedString}
-                    </small>
-                </p>
-            </p>
-        </div>
-        <div>
-            <p align="left" style="overflow-wrap: anywhere" class="postContent" data-id="${post.id}" id="postContent-${post.id}"><pre style="overflow-x:auto;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word" align="left">${post.content}</pre></p>
-            
-            <div style="width:100%; height:auto">
-                <a href="${post.postImage}"><img id="image-${post.id}" width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
-            </div>
-        </div>
-        <div style="padding-top:5px;padding-bottom:5px;margin-left:25%;margin-right:25%;margin-top:10px;margin-bottom:10px" class="border-dark border-top border-bottom">
-                <form class="likeControl" id="likeControl-${post.id}" data-form-id="${post.id}">
-                    <button href="#" class="btn btn-primary" >
-                        <i id="like-unlike-${post.id}" class="fas fa-thumbs-up">
-                            ${post.liked ? 
-                                ` Unlike (${post.count})` : 
-                                ` Like (${post.count})`
-                            }
-                        </i>
-                    </button>
-                </form>
-            </div>
-            <div class="commentContainer" id="${post.id}" data-id="${post.id}" data-container-id="${post.id}">
-                Comments:    
-                ${commentString}
-            </div>
-            <div>
-                <form id="commentForm-${post.id}" class="commentControl" data-form-id="${post.id}">
-                    <input style="background:#DDE2E5" id="comment-${post.id}" name="comment" class="form-control" type="text" placeholder="Leave a comment">
-                    <div class="input-group-btn">
-                        <button style="margin-top:5px" class="btn btn-primary" type="submit" name="comment_submit">Comment</button>
+            <div class="row">    
+                <div class="col-sm-10">
+                    <div class="col align-self-start">
+                        <p align="left">
+                            <img style="margin-left:10px;margin-right:10px" align="left" data-id="${post.id}" id="postAuthorProfileImage-${post.id}" class="rounded-circle postAuthorProfileImage" src="${author.profilePic}" height="50px" width="50px">
+                            <p align="left" style="margin-left:5px">
+                                <strong data-id="${post.id}" class="postAuthorName" id="postAuthorName-${post.id}">
+                                    ${author.name}
+                                </strong>
+                                <br>
+                                <small id="timePosted-${post.id}">
+                                    ${timePostedString}
+                                </small>
+                            </p>
+                        </p>
                     </div>
-                </form>
+                </div>
+                <div class="col-sm-2 text-end">
+                    <i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>
+                </div>
             </div>
-    </div>            
+
+            <!--POST CONTENT SECTION-->
+                <div class="container-fluid text-start text-wrap">
+                    <pre class="text-start">${post.content}</pre>
+                </div>
+                <div style="margin-left:5px;margin-right:5px;" id="image-${post.id}" class="border-top border-bottom border-left border-right" style="width:100%; height:auto">
+                    <a href="${post.postImage}"><img width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
+                </div>
+            <!--END POST CONTENT SECTION-->
+
+            <!--LIKE UNLIKE SECTION-->
+                <div class="border-dark border-top border-bottom text-center pt-2 pb-2 mt-2">
+                    <form class="likeControl" id="likeControl-${post.id}" data-form-id="${post.id}">
+                        <button href="#" class="btn btn-primary" >
+                            <i id="like-unlike-${post.id}" class="fas fa-thumbs-up">
+                                ${post.liked ? 
+                                    ` Unlike (${post.count})` : 
+                                    ` Like (${post.count})`
+                                }
+                            </i>
+                        </button>
+                    </form>
+                </div>
+            <!--END LIKE UNLIKE SECTION-->
+
+            <!--COMMENT SECTON-->
+                <div style="margin-left:10px;" class="commentContainer" id="${post.id}" data-id="${post.id}" data-container-id="${post.id}">
+                    <p class="text-center">Comments:</p>
+                    ${commentString}
+                </div>
+                <div style="margin-left:25px;margin-right:25px">
+                    <form id="commentForm-${post.id}" class="commentControl" data-form-id="${post.id}">
+                        <input style="background:#DDE2E5" id="comment-${post.id}" name="comment" class="form-control" type="text" placeholder="Leave a comment">
+                        <div class="input-group-btn">
+                            <button style="margin-top:5px" class="btn btn-primary" type="submit" name="comment_submit">Comment</button>
+                        </div>
+                    </form>
+                </div>
+            <!--END COMMENT SECTON-->
+        </div>            
     `
     if (!load) {
         postBox.insertBefore(newPostBox, postBox.childNodes[0])
@@ -332,11 +412,11 @@ function createPost(post, author, postComments, load) {
     }
 }
 
-function getTimeElapsed(post) {
+function getTimeElapsed(obj) {
     var timePostedString
     var dateNow = Date.now();
     var newDateNow = new Date(dateNow)
-    var postTime = new Date(post.created)
+    var postTime = new Date(obj.created)
     var timeElasped = Math.floor((newDateNow - postTime) /1000)
     if (!timeElasped) {
         timeElasped = 0
@@ -377,4 +457,3 @@ function getTimeElapsed(post) {
 }
 
 loadOnce()
-
