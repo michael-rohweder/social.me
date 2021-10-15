@@ -8,16 +8,18 @@ from .forms import PostForm
 from profiles.models import Profile
 # Create your views here.
 
+
 @login_required(login_url='login')
 def index(request):
     return render(request, 'posts/main.html')
-    
+
+
 def postControl(request):
     form = PostForm
     if request.is_ajax():
         postImage = request.FILES.get('postedImage')
         postContent = request.POST.get('postContent')
-        
+
         if postContent != '':
             postCreator = Profile.objects.get(user=request.user)
             newPost = Post()
@@ -25,7 +27,6 @@ def postControl(request):
             newPost.author = postCreator
             newPost.content = postContent
             newPost.save()
-            print("POSTIMAGE PASSED:", postImage)
             if (postImage != None):
                 postImageURL = newPost.image.url
 
@@ -46,11 +47,12 @@ def postControl(request):
             }
             return JsonResponse({'post': newPostJSON, 'author': newPostAuthorJSON})
 
+
 def loadData(request):
     currentUser = request.user
     currentUserProfile = Profile.objects.get(user=currentUser)
     currentUserFriends = currentUserProfile.friends.all()
-    
+
     friendsJSON = []
     for frnd in currentUserFriends:
         friendOBJ = Profile.objects.get(id=frnd.id)
@@ -60,7 +62,7 @@ def loadData(request):
             'lastName': friendOBJ.lastName,
         }
         friendsJSON.append(friend)
-    
+
     allComments = Comments.objects.all().order_by('-created')
     allCommentsListJSON = []
     for comment in allComments:
@@ -73,7 +75,7 @@ def loadData(request):
             'profilePic': str(comment.commenter.profilePic.url)
         }
         allCommentsListJSON.append(com)
-    
+
     allPosts = Post.objects.all().order_by('-created')
     allPostListJSON = []
     for post in allPosts:
@@ -104,17 +106,19 @@ def loadData(request):
     }
     return JsonResponse({'currentUser': currentUserProfileJSON, 'allPosts': allPostListJSON, 'friends': friendsJSON, 'comments': allCommentsListJSON})
 
+
 def likeControl(request):
     if request.is_ajax():
         pk = request.POST.get('pk')
         post = Post.objects.get(id=pk)
         if request.user in post.liked.all():
-            liked=False
+            liked = False
             post.liked.remove(request.user)
         else:
-            liked=True
+            liked = True
             post.liked.add(request.user)
         return JsonResponse({'liked': liked, 'count': post.likeCount})
+
 
 def commentControl(request):
     if request.is_ajax():
