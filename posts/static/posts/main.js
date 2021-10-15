@@ -317,6 +317,7 @@ function createPost(post, author, postComments, load) {
     commentString = ''
     if (postComments != '') {
         postComments.slice().reverse().forEach(comment => {
+            timeCommentString = getTimeElapsed(comment)
             commentString += `
             <div style="text-align:left">
                 <img align="left" class="rounded-circle postAuthorProfileImage" src="${comment.profilePic}" height="35px" width="35px">      
@@ -348,7 +349,7 @@ function createPost(post, author, postComments, load) {
                     </div>
                 </div>
                 <div class="col-sm-2 text-end">
-                    <i id="elipses-${post.id}" class="fas fa-ellipsis-v" style="margin-right:10px"></i>
+                    <i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>
                 </div>
             </div>
 
@@ -400,11 +401,11 @@ function createPost(post, author, postComments, load) {
     }
 }
 
-function getTimeElapsed(post) {
+function getTimeElapsed(obj) {
     var timePostedString
     var dateNow = Date.now();
     var newDateNow = new Date(dateNow)
-    var postTime = new Date(post.created)
+    var postTime = new Date(obj.created)
     var timeElasped = Math.floor((newDateNow - postTime) /1000)
     if (!timeElasped) {
         timeElasped = 0

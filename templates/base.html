@@ -29,11 +29,11 @@
                     <button class="btn btn-info" onClick="location.href=`{% url 'logout' %}`">Log Out</button>
                 </div>
                 <div class="col-sm-2"></div>
-                <div class="col-sm-4 text-left text-dark mx-auto bg-white rounded pt-2 pb-2" id="createPostDiv">
+                <div class="col-sm-3 text-left text-dark mx-auto bg-white rounded pt-2 pb-2" id="createPostDiv">
                     Create a Post
                     <button id="createPostButton" type="button" class="invisible" data-bs-toggle="modal" data-bs-target="#postModal"></button> {% block userName %}{%endblock userName%}
                 </div>
-                <div class="col-sm-2"></div>
+                <div class="col-sm-3"></div>
                 <div class="col-sm-2 text-right" style="padding-right:10px">
                     <form id="searchForm">
                         <div class="input-group">
