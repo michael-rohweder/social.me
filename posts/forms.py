@@ -9,3 +9,12 @@ class PostForm(forms.ModelForm):
             'content': "What's new?",
             'image': 'Upload a picture'
         }
+
+class EditForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ('content', 'image')
+        labels = {
+            'content': "What's new?",
+            'image': 'Upload a picture'
+        }

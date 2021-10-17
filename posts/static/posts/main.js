@@ -31,8 +31,6 @@ const loadOnce = () => {
             friendListOld = friends
             commentListOld = comments
 
-            
-
             //POST BOX EVENTLISTENER
             const postSave = document.getElementById('post_save')
             const postInput = document.getElementById('id_content')
@@ -140,12 +138,34 @@ const loadOnce = () => {
     })
 }
 
+function handleDeleteButtonPressed(post) {
+    $.ajax({
+        type: "POST",
+        url: "deletePost/",
+        data: {
+            'csrfmiddlewaretoken': csrftoken,
+            'pk': post.id
+        },
+        success: function(response) {
+            const postId = response.post.id
+            const postBoxToDelete = document.getElementById(`postBoxContainer-${postId}`)
+            postBoxToDelete.remove()
+            $('#editPostModal').modal('hide')
+
+        },
+        error: function(error) {
+            console.log("ERROR:", error)
+        }
+    })
+}
+
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
     
     const elipsesPost = document.getElementById(`elipses-${post.id}`)
     const commentForm = document.getElementById(`commentForm-${post.id}`)
-
+    const editPostButton = document.getElementById('editPostButton')
+    const deletePostButton = document.getElementById('deletePostButton')
     elipsesPost.addEventListener("click", e => {
         e.preventDefault()
         $.ajax({
@@ -156,7 +176,11 @@ function attachEventListeners(post) {
                 'pk': post.id
             },
             success: function(response) {
-                alert(response.message)
+                post = response.post
+                editPostButton.click()
+                deletePostButton.onclick = function() {
+                    handleDeleteButtonPressed(post)
+                }
             },
             error: function(error) {
                 console.log("ERROR:", error)

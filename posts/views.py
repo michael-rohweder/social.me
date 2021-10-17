@@ -5,7 +5,7 @@ from social_site.views import Login
 from .models import Post, Profile, Comments
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .forms import PostForm
+from .forms import PostForm, EditForm
 from profiles.models import Profile
 # Create your views here.
 
@@ -13,14 +13,36 @@ from profiles.models import Profile
 @login_required(login_url='login')
 def index(request):
     form = PostForm
-    return render(request, 'posts/main.html', {'form': form})
+    editForm = EditForm
+    return render(request, 'posts/main.html', {'form': form, 'editForm': editForm})
 
+def deletePost(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            postJSON = {
+                'id': post.id
+            }
+            post.delete()
+            return JsonResponse({'post': postJSON})
 
 def editPost(request):
     if request.is_ajax():
         post = Post.objects.get(id=request.POST.get('pk'))
         if post.author.user == request.user:
-            return JsonResponse({'message': 'This is your post!'})
+            if post.image:
+                postImage = post.image.url
+            else:
+                postImage = ""
+            postJSON = {
+                'id': post.id,
+                'author': post.author.id,
+                'count': post.likeCount,
+                'content': post.content,
+                'postImage': postImage
+            }
+            
+            return JsonResponse({'post': postJSON})
         else:
             return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
 

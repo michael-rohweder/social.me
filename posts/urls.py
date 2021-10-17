@@ -7,6 +7,7 @@ from .views import (
     commentControl,
     postControl,
     editPost,
+    deletePost,
 )
 
 app_name = 'posts'
@@ -16,6 +17,7 @@ urlpatterns = [
     path('data/', loadData, name='posts-data'),
     path('likeControl/', likeControl, name="likeControl"),
     path('editPost/', editPost, name='editPost'),
+    path('deletePost/', deletePost, name='deletePost'),
     path('commentControl/', commentControl, name="commentControl"),
     path('postControl/', postControl, name="postControl")
 ]
