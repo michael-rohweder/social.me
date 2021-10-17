@@ -43,6 +43,8 @@ const loadOnce = () => {
             const createPostButton = document.getElementById('createPostButton')
             const editPostButton = document.getElementById('editPostButton')
             const searchForm = document.getElementById('searchForm')
+            const modalTitle = document.getElementById('postModalLabel')
+
             searchForm.addEventListener('submit', e => {
                 e.preventDefault()
                 alert("This feature is coming soon!")
@@ -144,16 +146,37 @@ const loadOnce = () => {
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
     
-    const elipsesPost = document.getElementById(`elipses-${post.id}`)
+    const editPostIcon = document.getElementById(`elipses-${post.id}`)
     const commentForm = document.getElementById(`commentForm-${post.id}`)
     const postSave = document.getElementById('post_save')
-    const postInput = document.getElementById('id_content')
-    const postImage = document.getElementById('id_image')
+    const postInput = document.getElementById('edit_content')
+    const postImage = document.getElementById('edit_image')
     const errorMessage = document.getElementById('error_message')
     const postCancel = document.getElementById('post_cancel')
     const editPostButton = document.getElementById('editPostButton')
+    const deletePostButton = document.getElementById('post_delete')
 
-    elipsesPost.addEventListener("click", e => {
+    deletePostButton.addEventListener("click", e => {
+        e.preventDefault()
+        $.ajax({
+            type: "POST",
+            url: "deletePost/",
+            data: {
+                'csrfmiddlewaretoken': csrftoken,
+                'pk': post.id
+            },
+            success: function(response){
+                $('#editPostModal').modal('hide')
+                alert("Post Deleted")
+            },
+            error: function(error){
+                $('#editPostModal').modal('hide')
+                alert("ERROR", error)
+            }
+        })
+    })
+
+    editPostIcon.addEventListener("click", e => {
         e.preventDefault()
         $.ajax({
             type: "POST",
@@ -166,7 +189,7 @@ function attachEventListeners(post) {
                 message = response.message
                 post = response.post
                 postInput.value = post.content
-                postImage.value = post.postImage
+                //postImage.value = post.postImage
                 editPostButton.click()
             },
             error: function(error) {

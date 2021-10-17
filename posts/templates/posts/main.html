@@ -63,7 +63,7 @@
     </div>
 </div>
 
-<!-- EDIT POST MODAL -->
+<!--EDIT POST MODAL -->
 <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -73,9 +73,10 @@
             </div>
             <div class="modal-body">
                 <p style="color:red" id='error_message'></p>
-                {{postForm|crispy}}
+                {{editPostForm|crispy}}
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="post_delete">DELETE POST</button>
                 <button type="button" class="btn btn-danger" id="edit_cancel" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-success" id="edit_save">Save Changes</button>
             </div>
