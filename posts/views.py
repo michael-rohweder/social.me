@@ -13,8 +13,17 @@ from profiles.models import Profile
 @login_required(login_url='login')
 def index(request):
     form = PostForm
-    editForm = EditForm
+    editForm = EditForm(auto_id="edit_%s")
     return render(request, 'posts/main.html', {'form': form, 'editForm': editForm})
+
+def editSave(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            postContent = request.POST.get('content')
+            post.content = postContent
+            post.save()
+            return JsonResponse({})
 
 def deletePost(request):
     if request.is_ajax():
@@ -118,7 +127,7 @@ def loadData(request):
         item = {
             'id': post.id,
             'content': post.content,
-            'author': post.author.user.username,
+            'author': post.author.user.id,
             'authorFirstName': post.author.firstName,
             'authorLastName': post.author.lastName,
             'profilePic': str(post.author.profilePic.url),
@@ -174,5 +183,4 @@ def commentControl(request):
             commentList.append(com)
         if comment.comment != '':
             comment.save()
-            print("commentControll Called!")
             return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic.url)})

@@ -1,5 +1,6 @@
 const postBox = document.getElementById("posts-box")
 const friendList = document.getElementById("friendList")
+var currentUser = ''
 var postListOld, commentListOld, friendListOld, likeListOld, likeChanged
 
 const getCookie = (name) => {
@@ -30,6 +31,7 @@ const loadOnce = () => {
             postListOld = []
             friendListOld = friends
             commentListOld = comments
+            currentUser = response.currentUser.id
 
             //POST BOX EVENTLISTENER
             const postSave = document.getElementById('post_save')
@@ -159,6 +161,25 @@ function handleDeleteButtonPressed(post) {
     })
 }
 
+function handleEditSaveButtonPressed(post) {
+    $.ajax({
+        type: "POST",
+        url: "editSave/",
+        data: {
+            'csrfmiddlewaretoken': csrftoken,
+            'pk': post.id,
+            'content': post.content
+        },
+        success: function(response) {
+            $('#editPostModal').modal('hide')
+
+        },
+        error: function(error) {
+            console.log("ERROR:", error)
+        }
+    })
+}
+
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
     
@@ -166,28 +187,40 @@ function attachEventListeners(post) {
     const commentForm = document.getElementById(`commentForm-${post.id}`)
     const editPostButton = document.getElementById('editPostButton')
     const deletePostButton = document.getElementById('deletePostButton')
-    elipsesPost.addEventListener("click", e => {
-        e.preventDefault()
-        $.ajax({
-            type: "POST",
-            url: "editPost/",
-            data: {
-                'csrfmiddlewaretoken': csrftoken,
-                'pk': post.id
-            },
-            success: function(response) {
-                post = response.post
-                editPostButton.click()
-                deletePostButton.onclick = function() {
-                    handleDeleteButtonPressed(post)
-                }
-            },
-            error: function(error) {
-                console.log("ERROR:", error)
-            }
-        })
-    })
+    const editSaveButton = document.getElementById("editPost_save")
+    if (elipsesPost){
 
+        elipsesPost.addEventListener("click", e => {
+            e.preventDefault()
+            $.ajax({
+                type: "POST",
+                url: "editPost/",
+                data: {
+                    'csrfmiddlewaretoken': csrftoken,
+                    'pk': post.id
+                },
+                success: function(response) {
+                    post = response.post
+                    editPostButton.click()
+                    
+                    const editContent = document.getElementById('edit_content')
+                    editContent.value = post.content
+
+                    editSaveButton.onclick = function() {
+                        post.content = editContent.value
+                        handleEditSaveButtonPressed(post)
+                    }
+
+                    deletePostButton.onclick = function() {
+                        handleDeleteButtonPressed(post)
+                    }
+                },
+                error: function(error) {
+                    console.log("ERROR:", error)
+                }
+            })
+        })
+    }
     commentForm.addEventListener("submit", e => {
         e.preventDefault()
         createComment(post, commentForm)
@@ -214,8 +247,8 @@ function attachEventListeners(post) {
 }
 
 function createComment(post, ...args) {
+    const inputField = document.getElementById(`comment-${post.id}`)
     if (post != '') {
-        const inputField = document.getElementById(`comment-${post.id}`)
         const commentContainer = document.getElementById(post.id)
         $.ajax({
             type: 'POST',
@@ -256,7 +289,6 @@ function createComment(post, ...args) {
                 </p>
         `
         const commentContainer = document.getElementById(args[0].post)
-        inputField.value = ''
         commentContainer.append(newComment)
     }
 }
@@ -276,6 +308,7 @@ function updateLikes(allPosts) {
 
 $(document).ready(function() {
     setInterval(function() {
+        console.log("TICK!")
         $.ajax({
             type: 'GET',
             url: "/data/",
@@ -283,10 +316,10 @@ $(document).ready(function() {
                 allPosts = response.allPosts
                 friends = response.friends
                 comments = response.comments
-
                 if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
                     allPosts.forEach(newPost => {
                         if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
+                            //This post does not exist
                             author = {
                                 'name': newPost.name,
                                 'firstName': newPost.authorFirstName,
@@ -294,6 +327,25 @@ $(document).ready(function() {
                                 'profilePic': newPost.profilePic
                             }
                             createPost(newPost, author, '', false)
+                        }
+                    })
+                    postListOld.forEach(oldPost => {
+                        if (allPosts.findIndex((e) => e.id === oldPost.id) === -1){
+                            //NOT IN UPDATED LIST - REMOVE IT!
+                            postBoxContainer = document.getElementById(`postBoxContainer-${oldPost.id}`)
+                            if (postBoxContainer){
+                                postBoxContainer.remove()
+                            }
+                        } else {
+                            //STILL IN UPDATED LIST - UPDATE IT!
+                            console.log("UPDATE IT!")
+                            postId = oldPost.id
+                            allPosts.forEach(newPost => {
+                                if (newPost.id == postId) {
+                                    updatedPost = newPost
+                                }
+                            })
+                            updatePost(updatedPost)
                         }
                     })
 
@@ -331,8 +383,14 @@ $(document).ready(function() {
                 console.log("ERROR:", error)
             }
         })
-    }, 5000)
+    }, 1000)
 })
+
+function updatePost(post) {
+    const postBox = document.getElementById(`postBoxContainer-${post.id}`)
+    const postContentBox = document.getElementById(`postContent-${post.id}`)
+    postContentBox.innerText = post.content
+}
 
 function createPost(post, author, postComments, load) {
     const newPostBox = document.createElement("div")
@@ -352,6 +410,7 @@ function createPost(post, author, postComments, load) {
             `
         })
     }
+    editPostIcon = `<i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>`
     newPostBox.innerHTML = `
     <div class="postBoxContainer text-start mx-auto" data-id="${post.id}" id="postBoxContainer-${post.id}" style="padding-left:15px;padding-right:15px;max-width:680px">
         <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#ffffff;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
@@ -373,13 +432,13 @@ function createPost(post, author, postComments, load) {
                     </div>
                 </div>
                 <div class="col-sm-2 text-end">
-                    <i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>
+                    ${post.author == currentUser ? editPostIcon : '<i></i>'}
                 </div>
             </div>
 
             <!--POST CONTENT SECTION-->
                 <div class="container-fluid text-start text-wrap">
-                    <pre class="text-start">${post.content}</pre>
+                    <pre class="text-start" id="postContent-${post.id}">${post.content}</pre>
                 </div>
                 <div style="margin-left:5px;margin-right:5px;" id="image-${post.id}" class="border-top border-bottom border-left border-right" style="width:100%; height:auto">
                     <a href="${post.postImage}"><img width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
