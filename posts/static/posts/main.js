@@ -1,5 +1,6 @@
 const postBox = document.getElementById("posts-box")
 const friendList = document.getElementById("friendList")
+var currentUser = ''
 var postListOld, commentListOld, friendListOld, likeListOld, likeChanged
 
 const getCookie = (name) => {
@@ -30,6 +31,7 @@ const loadOnce = () => {
             postListOld = []
             friendListOld = friends
             commentListOld = comments
+            currentUser = response.currentUser.id
 
             
 
@@ -41,6 +43,7 @@ const loadOnce = () => {
             const postCancel = document.getElementById('post_cancel')
             const createPostDiv = document.getElementById('createPostDiv')
             const createPostButton = document.getElementById('createPostButton')
+<<<<<<< HEAD
             const editPostButton = document.getElementById('editPostButton')
             const searchForm = document.getElementById('searchForm')
             const modalTitle = document.getElementById('postModalLabel')
@@ -63,6 +66,27 @@ const loadOnce = () => {
             })
             postSave.addEventListener("click", e => {
                 e.preventDefault()
+=======
+            const searchForm = document.getElementById('searchForm')
+            searchForm.addEventListener('submit', e => {
+                e.preventDefault()
+                alert("This feature is coming soon!")
+            })
+
+            createPostDiv.addEventListener('click', e => {
+                e.preventDefault()
+                createPostButton.click()
+            })
+            postCancel.addEventListener("click", e => {
+                e.preventDefault()
+                postInput.value = ''
+                postImage.value = ''
+                errorMessage.innerText = ''
+                $('#postModal').modal('hide')
+            })
+            postSave.addEventListener("click", e => {
+                e.preventDefault()
+>>>>>>> development
                 if (postInput.value != '' || $(postImage).prop('files').length > 0) {
                     errorMessage.innerText = ''
 
@@ -136,6 +160,49 @@ const loadOnce = () => {
                 createPost(post, author, postComments, true)
                 attachEventListeners(post)
             })
+<<<<<<< HEAD
+=======
+        },
+        error: function(error) {
+            console.log("ERROR:", error)
+        }
+    })
+}
+
+function handleDeleteButtonPressed(post) {
+    $.ajax({
+        type: "POST",
+        url: "deletePost/",
+        data: {
+            'csrfmiddlewaretoken': csrftoken,
+            'pk': post.id
+        },
+        success: function(response) {
+            const postId = response.post.id
+            const postBoxToDelete = document.getElementById(`postBoxContainer-${postId}`)
+            postBoxToDelete.remove()
+            $('#editPostModal').modal('hide')
+
+        },
+        error: function(error) {
+            console.log("ERROR:", error)
+        }
+    })
+}
+
+function handleEditSaveButtonPressed(post) {
+    $.ajax({
+        type: "POST",
+        url: "editSave/",
+        data: {
+            'csrfmiddlewaretoken': csrftoken,
+            'pk': post.id,
+            'content': post.content
+        },
+        success: function(response) {
+            $('#editPostModal').modal('hide')
+
+>>>>>>> development
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -146,6 +213,7 @@ const loadOnce = () => {
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
     
+<<<<<<< HEAD
     const editPostIcon = document.getElementById(`elipses-${post.id}`)
     const commentForm = document.getElementById(`commentForm-${post.id}`)
     const postSave = document.getElementById('post_save')
@@ -198,6 +266,46 @@ function attachEventListeners(post) {
         })
     })
 
+=======
+    const elipsesPost = document.getElementById(`elipses-${post.id}`)
+    const commentForm = document.getElementById(`commentForm-${post.id}`)
+    const editPostButton = document.getElementById('editPostButton')
+    const deletePostButton = document.getElementById('deletePostButton')
+    const editSaveButton = document.getElementById("editPost_save")
+    if (elipsesPost){
+
+        elipsesPost.addEventListener("click", e => {
+            e.preventDefault()
+            $.ajax({
+                type: "POST",
+                url: "editPost/",
+                data: {
+                    'csrfmiddlewaretoken': csrftoken,
+                    'pk': post.id
+                },
+                success: function(response) {
+                    post = response.post
+                    editPostButton.click()
+                    
+                    const editContent = document.getElementById('edit_content')
+                    editContent.value = post.content
+
+                    editSaveButton.onclick = function() {
+                        post.content = editContent.value
+                        handleEditSaveButtonPressed(post)
+                    }
+
+                    deletePostButton.onclick = function() {
+                        handleDeleteButtonPressed(post)
+                    }
+                },
+                error: function(error) {
+                    console.log("ERROR:", error)
+                }
+            })
+        })
+    }
+>>>>>>> development
     commentForm.addEventListener("submit", e => {
         e.preventDefault()
         createComment(post, commentForm)
@@ -224,8 +332,13 @@ function attachEventListeners(post) {
 }
 
 function createComment(post, ...args) {
+<<<<<<< HEAD
     if (post != '') {
         const inputField = document.getElementById(`comment-${post.id}`)
+=======
+    const inputField = document.getElementById(`comment-${post.id}`)
+    if (post != '') {
+>>>>>>> development
         const commentContainer = document.getElementById(post.id)
         $.ajax({
             type: 'POST',
@@ -266,7 +379,10 @@ function createComment(post, ...args) {
                 </p>
         `
         const commentContainer = document.getElementById(args[0].post)
+<<<<<<< HEAD
         inputField.value = ''
+=======
+>>>>>>> development
         commentContainer.append(newComment)
     }
 }
@@ -286,6 +402,10 @@ function updateLikes(allPosts) {
 
 $(document).ready(function() {
     setInterval(function() {
+<<<<<<< HEAD
+=======
+        console.log("TICK!")
+>>>>>>> development
         $.ajax({
             type: 'GET',
             url: "/data/",
@@ -293,10 +413,17 @@ $(document).ready(function() {
                 allPosts = response.allPosts
                 friends = response.friends
                 comments = response.comments
+<<<<<<< HEAD
 
                 if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
                     allPosts.forEach(newPost => {
                         if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
+=======
+                if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
+                    allPosts.forEach(newPost => {
+                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
+                            //This post does not exist
+>>>>>>> development
                             author = {
                                 'name': newPost.name,
                                 'firstName': newPost.authorFirstName,
@@ -304,6 +431,25 @@ $(document).ready(function() {
                                 'profilePic': newPost.profilePic
                             }
                             createPost(newPost, author, '', false)
+                        }
+                    })
+                    postListOld.forEach(oldPost => {
+                        if (allPosts.findIndex((e) => e.id === oldPost.id) === -1){
+                            //NOT IN UPDATED LIST - REMOVE IT!
+                            postBoxContainer = document.getElementById(`postBoxContainer-${oldPost.id}`)
+                            if (postBoxContainer){
+                                postBoxContainer.remove()
+                            }
+                        } else {
+                            //STILL IN UPDATED LIST - UPDATE IT!
+                            console.log("UPDATE IT!")
+                            postId = oldPost.id
+                            allPosts.forEach(newPost => {
+                                if (newPost.id == postId) {
+                                    updatedPost = newPost
+                                }
+                            })
+                            updatePost(updatedPost)
                         }
                     })
 
@@ -341,8 +487,14 @@ $(document).ready(function() {
                 console.log("ERROR:", error)
             }
         })
-    }, 5000)
+    }, 1000)
 })
+
+function updatePost(post) {
+    const postBox = document.getElementById(`postBoxContainer-${post.id}`)
+    const postContentBox = document.getElementById(`postContent-${post.id}`)
+    postContentBox.innerText = post.content
+}
 
 function createPost(post, author, postComments, load) {
     const newPostBox = document.createElement("div")
@@ -362,6 +514,7 @@ function createPost(post, author, postComments, load) {
             `
         })
     }
+    editPostIcon = `<i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>`
     newPostBox.innerHTML = `
     <div class="postBoxContainer text-start mx-auto" data-id="${post.id}" id="postBoxContainer-${post.id}" style="padding-left:15px;padding-right:15px;max-width:680px">
         <div class="col-sm-12" style="margin-bottom:10px;box-shadow:3px 3px 2px gray;background:#ffffff;padding-top:10px;padding-bottom:10px;margin-top:10px;border:solid 1px black">
@@ -383,13 +536,21 @@ function createPost(post, author, postComments, load) {
                     </div>
                 </div>
                 <div class="col-sm-2 text-end">
+<<<<<<< HEAD
                     <i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>
+=======
+                    ${post.author == currentUser ? editPostIcon : '<i></i>'}
+>>>>>>> development
                 </div>
             </div>
 
             <!--POST CONTENT SECTION-->
                 <div class="container-fluid text-start text-wrap">
+<<<<<<< HEAD
                     <pre class="text-start">${post.content}</pre>
+=======
+                    <pre class="text-start" id="postContent-${post.id}">${post.content}</pre>
+>>>>>>> development
                 </div>
                 <div style="margin-left:5px;margin-right:5px;" id="image-${post.id}" class="border-top border-bottom border-left border-right" style="width:100%; height:auto">
                     <a href="${post.postImage}"><img width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>

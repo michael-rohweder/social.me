@@ -5,6 +5,7 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ('content', 'image')
+<<<<<<< HEAD
 
         labels = {
             'content': "What's new?",
@@ -24,4 +25,18 @@ class EditPostForm(forms.ModelForm):
         id = {
             'content': 'editPostContent',
             'image': 'editPostImage'
+=======
+        labels = {
+            'content': "What's new?",
+            'image': 'Upload a picture'
+        }
+
+class EditForm(forms.ModelForm):
+    class Meta:
+        model = Post
+        fields = ('content', 'image')
+        labels = {
+            'content': "What's new?",
+            'image': 'Upload a picture'
+>>>>>>> development
         }

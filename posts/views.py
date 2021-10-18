@@ -5,22 +5,52 @@ from social_site.views import Login
 from .models import Post, Profile, Comments
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+<<<<<<< HEAD
 from .forms import PostForm, EditPostForm
+=======
+from .forms import PostForm, EditForm
+>>>>>>> development
 from profiles.models import Profile
 # Create your views here.
 
 
 @login_required(login_url='login')
 def index(request):
+<<<<<<< HEAD
     postForm = PostForm
     editPost = EditPostForm(auto_id="edit_%s")
     return render(request, 'posts/main.html', {'postForm': postForm, 'editPostForm': editPost})
 
+=======
+    form = PostForm
+    editForm = EditForm(auto_id="edit_%s")
+    return render(request, 'posts/main.html', {'form': form, 'editForm': editForm})
+
+def editSave(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            postContent = request.POST.get('content')
+            post.content = postContent
+            post.save()
+            return JsonResponse({})
+
+def deletePost(request):
+    if request.is_ajax():
+        post = Post.objects.get(id=request.POST.get('pk'))
+        if post.author.user == request.user:
+            postJSON = {
+                'id': post.id
+            }
+            post.delete()
+            return JsonResponse({'post': postJSON})
+>>>>>>> development
 
 def editPost(request):
     if request.is_ajax():
         post = Post.objects.get(id=request.POST.get('pk'))
         if post.author.user == request.user:
+<<<<<<< HEAD
             if (post.image):
                 postImage = str(post.image.url)
             else:
@@ -43,6 +73,21 @@ def deletePost(request):
         if post.author.user == request.user:
             post.delete()
             return JsonResponse({})
+=======
+            if post.image:
+                postImage = post.image.url
+            else:
+                postImage = ""
+            postJSON = {
+                'id': post.id,
+                'author': post.author.id,
+                'count': post.likeCount,
+                'content': post.content,
+                'postImage': postImage
+            }
+            
+            return JsonResponse({'post': postJSON})
+>>>>>>> development
         else:
             return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
 
@@ -118,7 +163,7 @@ def loadData(request):
         item = {
             'id': post.id,
             'content': post.content,
-            'author': post.author.user.username,
+            'author': post.author.user.id,
             'authorFirstName': post.author.firstName,
             'authorLastName': post.author.lastName,
             'profilePic': str(post.author.profilePic.url),
@@ -174,5 +219,4 @@ def commentControl(request):
             commentList.append(com)
         if comment.comment != '':
             comment.save()
-            print("commentControll Called!")
             return JsonResponse({'commentList': commentList, 'id': comment.id, 'comment': str(comment.comment), 'commenter': commenterFullName, 'profilePic': str(comment.commenter.profilePic.url)})
