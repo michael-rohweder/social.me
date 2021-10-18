@@ -43,30 +43,6 @@ const loadOnce = () => {
             const postCancel = document.getElementById('post_cancel')
             const createPostDiv = document.getElementById('createPostDiv')
             const createPostButton = document.getElementById('createPostButton')
-<<<<<<< HEAD
-            const editPostButton = document.getElementById('editPostButton')
-            const searchForm = document.getElementById('searchForm')
-            const modalTitle = document.getElementById('postModalLabel')
-
-            searchForm.addEventListener('submit', e => {
-                e.preventDefault()
-                alert("This feature is coming soon!")
-            })
-
-            createPostDiv.addEventListener('click', e => {
-                e.preventDefault()
-                createPostButton.click()
-            })
-            postCancel.addEventListener("click", e => {
-                e.preventDefault()
-                postInput.value = ''
-                postImage.value = ''
-                errorMessage.innerText = ''
-                $('#postModal').modal('hide')
-            })
-            postSave.addEventListener("click", e => {
-                e.preventDefault()
-=======
             const searchForm = document.getElementById('searchForm')
             searchForm.addEventListener('submit', e => {
                 e.preventDefault()
@@ -86,7 +62,6 @@ const loadOnce = () => {
             })
             postSave.addEventListener("click", e => {
                 e.preventDefault()
->>>>>>> development
                 if (postInput.value != '' || $(postImage).prop('files').length > 0) {
                     errorMessage.innerText = ''
 
@@ -160,8 +135,6 @@ const loadOnce = () => {
                 createPost(post, author, postComments, true)
                 attachEventListeners(post)
             })
-<<<<<<< HEAD
-=======
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -202,7 +175,6 @@ function handleEditSaveButtonPressed(post) {
         success: function(response) {
             $('#editPostModal').modal('hide')
 
->>>>>>> development
         },
         error: function(error) {
             console.log("ERROR:", error)
@@ -213,60 +185,6 @@ function handleEditSaveButtonPressed(post) {
 function attachEventListeners(post) {
     //ADD EVENT LISTENERS
     
-<<<<<<< HEAD
-    const editPostIcon = document.getElementById(`elipses-${post.id}`)
-    const commentForm = document.getElementById(`commentForm-${post.id}`)
-    const postSave = document.getElementById('post_save')
-    const postInput = document.getElementById('edit_content')
-    const postImage = document.getElementById('edit_image')
-    const errorMessage = document.getElementById('error_message')
-    const postCancel = document.getElementById('post_cancel')
-    const editPostButton = document.getElementById('editPostButton')
-    const deletePostButton = document.getElementById('post_delete')
-
-    deletePostButton.addEventListener("click", e => {
-        e.preventDefault()
-        $.ajax({
-            type: "POST",
-            url: "deletePost/",
-            data: {
-                'csrfmiddlewaretoken': csrftoken,
-                'pk': post.id
-            },
-            success: function(response){
-                $('#editPostModal').modal('hide')
-                alert("Post Deleted")
-            },
-            error: function(error){
-                $('#editPostModal').modal('hide')
-                alert("ERROR", error)
-            }
-        })
-    })
-
-    editPostIcon.addEventListener("click", e => {
-        e.preventDefault()
-        $.ajax({
-            type: "POST",
-            url: "editPost/",
-            data: {
-                'csrfmiddlewaretoken': csrftoken,
-                'pk': post.id
-            },
-            success: function(response) {
-                message = response.message
-                post = response.post
-                postInput.value = post.content
-                //postImage.value = post.postImage
-                editPostButton.click()
-            },
-            error: function(error) {
-                console.log("ERROR:", error)
-            }
-        })
-    })
-
-=======
     const elipsesPost = document.getElementById(`elipses-${post.id}`)
     const commentForm = document.getElementById(`commentForm-${post.id}`)
     const editPostButton = document.getElementById('editPostButton')
@@ -305,7 +223,6 @@ function attachEventListeners(post) {
             })
         })
     }
->>>>>>> development
     commentForm.addEventListener("submit", e => {
         e.preventDefault()
         createComment(post, commentForm)
@@ -332,13 +249,8 @@ function attachEventListeners(post) {
 }
 
 function createComment(post, ...args) {
-<<<<<<< HEAD
-    if (post != '') {
-        const inputField = document.getElementById(`comment-${post.id}`)
-=======
     const inputField = document.getElementById(`comment-${post.id}`)
     if (post != '') {
->>>>>>> development
         const commentContainer = document.getElementById(post.id)
         $.ajax({
             type: 'POST',
@@ -379,10 +291,6 @@ function createComment(post, ...args) {
                 </p>
         `
         const commentContainer = document.getElementById(args[0].post)
-<<<<<<< HEAD
-        inputField.value = ''
-=======
->>>>>>> development
         commentContainer.append(newComment)
     }
 }
@@ -402,10 +310,7 @@ function updateLikes(allPosts) {
 
 $(document).ready(function() {
     setInterval(function() {
-<<<<<<< HEAD
-=======
         console.log("TICK!")
->>>>>>> development
         $.ajax({
             type: 'GET',
             url: "/data/",
@@ -413,17 +318,10 @@ $(document).ready(function() {
                 allPosts = response.allPosts
                 friends = response.friends
                 comments = response.comments
-<<<<<<< HEAD
-
-                if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
-                    allPosts.forEach(newPost => {
-                        if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
-=======
                 if (JSON.stringify(allPosts) != JSON.stringify(postListOld)) {
                     allPosts.forEach(newPost => {
                         if (!document.getElementById(`postBoxContainer-${newPost.id}`)) {
                             //This post does not exist
->>>>>>> development
                             author = {
                                 'name': newPost.name,
                                 'firstName': newPost.authorFirstName,
@@ -536,21 +434,13 @@ function createPost(post, author, postComments, load) {
                     </div>
                 </div>
                 <div class="col-sm-2 text-end">
-<<<<<<< HEAD
-                    <i id="elipses-${post.id}" class="fas fa-edit" style="margin-right:10px"></i>
-=======
                     ${post.author == currentUser ? editPostIcon : '<i></i>'}
->>>>>>> development
                 </div>
             </div>
 
             <!--POST CONTENT SECTION-->
                 <div class="container-fluid text-start text-wrap">
-<<<<<<< HEAD
-                    <pre class="text-start">${post.content}</pre>
-=======
                     <pre class="text-start" id="postContent-${post.id}">${post.content}</pre>
->>>>>>> development
                 </div>
                 <div style="margin-left:5px;margin-right:5px;" id="image-${post.id}" class="border-top border-bottom border-left border-right" style="width:100%; height:auto">
                     <a href="${post.postImage}"><img width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>

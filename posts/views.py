@@ -5,23 +5,13 @@ from social_site.views import Login
 from .models import Post, Profile, Comments
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-<<<<<<< HEAD
-from .forms import PostForm, EditPostForm
-=======
 from .forms import PostForm, EditForm
->>>>>>> development
 from profiles.models import Profile
 # Create your views here.
 
 
 @login_required(login_url='login')
 def index(request):
-<<<<<<< HEAD
-    postForm = PostForm
-    editPost = EditPostForm(auto_id="edit_%s")
-    return render(request, 'posts/main.html', {'postForm': postForm, 'editPostForm': editPost})
-
-=======
     form = PostForm
     editForm = EditForm(auto_id="edit_%s")
     return render(request, 'posts/main.html', {'form': form, 'editForm': editForm})
@@ -44,36 +34,11 @@ def deletePost(request):
             }
             post.delete()
             return JsonResponse({'post': postJSON})
->>>>>>> development
 
 def editPost(request):
     if request.is_ajax():
         post = Post.objects.get(id=request.POST.get('pk'))
         if post.author.user == request.user:
-<<<<<<< HEAD
-            if (post.image):
-                postImage = str(post.image.url)
-            else:
-                postImage = ''
-            clickedPost = {
-                'id': post.id,
-                'content': post.content,
-                'author': post.author.id,
-                'count': post.likeCount,
-                'postImage': postImage
-
-            }
-            return JsonResponse({'message': 'This is your post!', 'post': clickedPost})
-        else:
-            return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
-            
-def deletePost(request):
-    if request.is_ajax():
-        post = Post.objects.get(id=request.POST.get('pk'))
-        if post.author.user == request.user:
-            post.delete()
-            return JsonResponse({})
-=======
             if post.image:
                 postImage = post.image.url
             else:
@@ -87,7 +52,6 @@ def deletePost(request):
             }
             
             return JsonResponse({'post': postJSON})
->>>>>>> development
         else:
             return JsonResponse({'message':"DONT TOUCH, YOU DONT OWN THIS!"})
 
