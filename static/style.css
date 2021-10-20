@@ -1,0 +1,21 @@
+.imagePreview{
+    width: 100%;
+    min-height: 100px;
+    border:2px solid #dddddd;
+    margin-top: 15px;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #cccccc;
+}
+
+.imagePreviewImage {
+    display:none;
+    width: 200px;
+}
+
+.removeImage {
+    color: red;
+    display: none;
+}

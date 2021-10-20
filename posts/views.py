@@ -19,10 +19,18 @@ def index(request):
 def editSave(request):
     if request.is_ajax():
         post = Post.objects.get(id=request.POST.get('pk'))
+        postImage = request.FILES.get('postedImage')
+        postContent = request.POST.get('postContent')
         if post.author.user == request.user:
-            postContent = request.POST.get('content')
-            post.content = postContent
-            post.save()
+            if postImage == None:
+                if postContent != '':
+                    post.content = postContent
+                    post.image = postImage
+                    post.save()
+            else:
+                post.content = postContent
+                post.image = postImage
+                post.save()
             return JsonResponse({})
 
 def deletePost(request):

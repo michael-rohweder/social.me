@@ -42,6 +42,12 @@ const loadOnce = () => {
             const createPostDiv = document.getElementById('createPostDiv')
             const createPostButton = document.getElementById('createPostButton')
             const searchForm = document.getElementById('searchForm')
+
+            const inputFile = document.getElementById('id_image')
+            const previewContainer = document.getElementById('imagePreview')
+            const previewImage = previewContainer.querySelector('.imagePreviewImage')
+            const imagePreviewDefaultText = previewContainer.querySelector('.imagePreviewDefaultText')
+
             searchForm.addEventListener('submit', e => {
                 e.preventDefault()
                 alert("This feature is coming soon!")
@@ -90,6 +96,8 @@ const loadOnce = () => {
                         postSave.innerHTML = "Save Post"
                         postInput.value = ''
                         postImage.value = ''
+                        previewImage.src = ''
+                        previewImage.style.display = 'none'
                         postInput.style.height = "50px"
                         newPost = response.post
                         author = response.author
@@ -161,20 +169,17 @@ function handleDeleteButtonPressed(post) {
     })
 }
 
-function handleEditSaveButtonPressed(post) {
+function handleEditSaveButtonPressed(formData) {
     $.ajax({
-        type: "POST",
-        url: "editSave/",
-        data: {
-            'csrfmiddlewaretoken': csrftoken,
-            'pk': post.id,
-            'content': post.content
-        },
+        type: 'POST',
+        url: 'editSave/',
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function(response) {
             $('#editPostModal').modal('hide')
-
         },
-        error: function(error) {
+        error: function(error){
             console.log("ERROR:", error)
         }
     })
@@ -204,13 +209,34 @@ function attachEventListeners(post) {
                     editPostButton.click()
                     
                     const editContent = document.getElementById('edit_content')
+                    const editImage = document.getElementById('edit_image')
+                    const editPreviewImage = document.getElementById('editPreviewImage')
+                    const editRemoveImage = document.getElementById('editRemoveImage')
+
                     editContent.value = post.content
+                    editPreviewImage.setAttribute('src', post.postImage)
+                    editPreviewImage.style.display = 'block'
+                    editRemoveImage.style.display = 'block'
+                    editRemoveImage.addEventListener('click', function() {
+                        editPreviewImage.src = ''
+                        editPreviewImage.style.display = 'none'
+                        editImage.value = null
+                        editRemoveImage.style.display = 'none'
+                    })
 
                     editSaveButton.onclick = function() {
+                        var formData = new FormData()
+                        if ($(editImage).prop('files').length > 0) {
+                            file = $(editImage).prop('files')[0]
+                            formData.append('postedImage', file)
+                        } 
+                        formData.append('csrfmiddlewaretoken', csrftoken)
+                        formData.append('postContent', editContent.value)
+                        formData.append('pk', post.id)
                         post.content = editContent.value
-                        handleEditSaveButtonPressed(post)
+                        
+                        handleEditSaveButtonPressed(formData)
                     }
-
                     deletePostButton.onclick = function() {
                         handleDeleteButtonPressed(post)
                     }
@@ -308,7 +334,6 @@ function updateLikes(allPosts) {
 
 $(document).ready(function() {
     setInterval(function() {
-        console.log("TICK!")
         $.ajax({
             type: 'GET',
             url: "/data/",
@@ -338,7 +363,6 @@ $(document).ready(function() {
                             }
                         } else {
                             //STILL IN UPDATED LIST - UPDATE IT!
-                            console.log("UPDATE IT!")
                             postId = oldPost.id
                             allPosts.forEach(newPost => {
                                 if (newPost.id == postId) {
@@ -389,6 +413,8 @@ $(document).ready(function() {
 function updatePost(post) {
     const postBox = document.getElementById(`postBoxContainer-${post.id}`)
     const postContentBox = document.getElementById(`postContent-${post.id}`)
+    const postImageBox = document.getElementById(`postImage-${post.id}`)
+    postImageBox.src = post.postImage
     postContentBox.innerText = post.content
 }
 
@@ -441,7 +467,7 @@ function createPost(post, author, postComments, load) {
                     <pre class="text-start" id="postContent-${post.id}">${post.content}</pre>
                 </div>
                 <div style="margin-left:5px;margin-right:5px;" id="image-${post.id}" class="border-top border-bottom border-left border-right" style="width:100%; height:auto">
-                    <a href="${post.postImage}"><img width="100%" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
+                    <a href="${post.postImage}"><img width="100%" id="postImage-${post.id}" height="100%" onerror="removeNode('image-${post.id}')" src="${post.postImage}"></a>
                 </div>
             <!--END POST CONTENT SECTION-->
 

@@ -10,6 +10,11 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
 
     <title>Social.ME {% block title %}{% endblock title %}</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static '/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static '/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static '/favicon-16x16.png' %}">
+    <link rel="manifest" href="/site.webmanifest">
 </head>
 
 <body style="background:#DDE2E5">
@@ -23,39 +28,38 @@
         <!--NAV DIV-->
         <div class="col-sm-12 bg-secondary text-light">
             {% block nav %}
-            <div class="row align-items-center" style="margin-left:5px;padding-top:5px;padding-bottom:5px">
-                {% if user.is_authenticated %}
-                <div class="col-sm-2 text-left">
-                    <button class="btn btn-info" onClick="location.href=`{% url 'logout' %}`">Log Out</button>
-                </div>
-                <div class="col-sm-2"></div>
-                <div class="col-sm-3 text-left text-dark mx-auto bg-white rounded pt-2 pb-2" id="createPostDiv">
-                    Create a Post
-                    {% block userName %}{%endblock userName%}
-                </div>
-                <div class="col-sm-3"></div>
-                <div class="col-sm-2 text-right" style="padding-right:10px">
-                    <form id="searchForm">
-                        <div class="input-group">
-                            <input class="form-control" placeholder="Search" name="search" type="text">
-                            <div class="input-group-btn">
-                                <button class="btn btn-info" type="submit">Search</button>
-                            </div>
+                <div class="row align-items-center" style="margin-left:5px;padding-top:5px;padding-bottom:5px">
+                    {% if user.is_authenticated %}
+                        <div class="col-sm-2 text-left">
+                            <button class="btn btn-info" onClick="location.href=`{% url 'logout' %}`">Log Out</button>
                         </div>
-                    </form>
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-3 text-left text-dark mx-auto bg-white rounded pt-2 pb-2" id="createPostDiv">
+                            Create a Post
+                            {% block userName %}{%endblock userName%}
+                        </div>
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-2 text-right" style="padding-right:10px">
+                            <form id="searchForm">
+                                <div class="input-group">
+                                    <input class="form-control" placeholder="Search" name="search" type="text">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-info" type="submit">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="col-sm-2 text-left">
+                            <button class="btn btn-info" onClick="location.href=`{% url 'login' %}`">Log In</button>
+                            <button class="btn btn-info" onClick="location.href=`{% url 'signup' %}`">Sign Up</button>
+                        </div>
+                        <div class="col-sm-8 text-center">
+                        </div>
+                        <div class="col-sm-2 text-right">
+                        </div>
+                    {% endif %}
                 </div>
-                
-                {% else %}
-                <div class="col-sm-2 text-left">
-                    <button class="btn btn-info" onClick="location.href=`{% url 'login' %}`">Log In</button>
-                    <button class="btn btn-info" onClick="location.href=`{% url 'signup' %}`">Sign Up</button>
-                </div>
-                <div class="col-sm-8 text-center">
-                </div>
-                <div class="col-sm-2 text-right">
-                </div>
-                {% endif %}
-            </div>
             {% endblock nav %}
         </div>
         <!--END NAV DIV-->

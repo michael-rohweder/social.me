@@ -3,7 +3,7 @@
 {% endblock scripts %} {% block title %} | Posts {% endblock title %} {% block left %}
 <div class="col-sm-12" style="
         height:250;
-        max_height:500px;
+        max-height:500px;
         overflow:auto;
         margin-bottom:10px;
         box-shadow:3px 3px 2px gray;
@@ -17,14 +17,20 @@
     <h3>NOTIFICATIONS</h3>
     Coming soon!<br><br>
 
-    <strong>New Features in the works:</strong><br> Profile page<br> Edit name, profile pic, etc<br> Edit/Remove posts<br> Friend Control<br> View Friends Profile<br><br> Suggestions, leave a post!
+    <strong>New Features in the works:</strong><br> 
+    Profile page<br> 
+    Edit name, profile pic, etc<br> 
+    Edit/Remove posts<br> 
+    Friend Control<br> 
+    View Friends Profile<br><br> 
+    Suggestions, leave a post!
 
 
 </div>
 {% endblock left %} {% block right %}
 <div class="col-sm-11" style="
         height:250;
-        max_height:500px;
+        max-height:500px;
         overflow:auto;
         margin-bottom:10px;
         box-shadow:3px 3px 2px gray;
@@ -53,7 +59,24 @@
             </div>
             <div class="modal-body">
                 <p style="color:red" id='error_message'></p>
-                {{form|crispy}}
+                <div class='control-group'>
+                    <div class='controls'>
+                        <textarea name='content' cols='40' rows='3' class='textarea' required='' id='id_content' placeholder="What's new?"></textarea>
+                    </div>
+                </div>
+                <label class='control-label imagePreview' for="id_image" style="cursor: pointer;" id="imagePreview">
+                    <div id='div_id_image' class='control-group'>
+                        <div class='controls'>
+                            Upload an image
+                                <input type='file' name='image' style="display:none" accept='image/*' class='clearablefileinput' id='id_image'>
+                                <img src="" alt="Image Preview" class='imagePreviewImage'>
+                                
+                        </div>
+                        
+                        <span class="imagePreviewDefaultText"></span>
+                    </div>
+                </label>
+                <div id='removeImage' style="cursor: pointer;" class='removeImage'>X</div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="post_cancel" data-bs-dismiss="modal">Cancel</button>
@@ -73,7 +96,24 @@
             </div>
             <div class="modal-body">
                 <p style="color:red" id='error_message'></p>
-                {{editForm|crispy}}
+                <div class='control-group'>
+                    <div class='controls'>
+                        <textarea name='content' cols='40' rows='3' class='textarea' required='' id='edit_content' placeholder="What's new?"></textarea>
+                    </div>
+                </div>
+                <label class='control-label imagePreview' for="edit_image" style="cursor: pointer;" id="editImagePreview">
+                    <div id='edit_div_id_image' class='control-group'>
+                        <div class='controls'>
+                            Upload an image
+                                <input type='file' name='image' style="display:none" accept='image/*' class='clearablefileinput' id='edit_image'>
+                                <img src="" alt="Image Preview" id='editPreviewImage' class='imagePreviewImage'>
+                                
+                        </div>
+                        <span class="imagePreviewDefaultText"></span>
+                    </div>
+                </label>
+                <div id='editRemoveImage' style="cursor: pointer;" class='removeImage'>X</div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="deletePostButton">DELETE POST</button>
@@ -87,6 +127,78 @@
 <div class="text-start" id='posts-box'></div>
 
 <script>
+    // NEW POST IMAGE CONTROL
+    const inputFile = document.getElementById('id_image')
+    const previewContainer = document.getElementById('imagePreview')
+    const previewImage = previewContainer.querySelector('.imagePreviewImage')
+    const imagePreviewDefaultText = previewContainer.querySelector('.imagePreviewDefaultText')
+    const removeImage = document.getElementById('removeImage')
+
+    inputFile.addEventListener("change", function() {
+        const file = this.files[0]
+        if (file) {
+            const reader = new FileReader();
+            imagePreviewDefaultText.style.display = 'none';
+            previewImage.style.display = 'block';
+
+            reader.addEventListener("load", function () {
+                previewImage.setAttribute('src', this.result);
+                removeImage.style.display = 'block'
+                removeImage.addEventListener('click', function() {
+                    inputFile.value = ''
+                    previewImage.src = ''
+                    previewImage.style.display = 'none'    
+                    removeImage.style.display = 'none'                
+
+                    console.log("REMOVE IMAGE")
+                })
+            });            
+            reader.readAsDataURL(file);
+
+        }
+        else {
+            console.log("NO FILE CHOSEN")
+            previewImage.src = ''
+            previewImage.style.display = 'none'
+        }
+        console.log(file)
+    })
+    
+    // EDIT POST IMAGE CONTROL
+    const editInputFile = document.getElementById('edit_image')
+    const editPreviewContainer = document.getElementById('editImagePreview')
+    const editRemoveImage = document.getElementById('editRemoveImage')
+    const editPreviewImage = document.getElementById('editPreviewImage')
+
+    editInputFile.addEventListener("change", function() {
+        const editFile = this.files[0]
+        if (editFile) {
+            const editReader = new FileReader();
+            editPreviewImage.style.display = 'block';
+
+            editReader.addEventListener("load", function () {
+                editPreviewImage.setAttribute('src', this.result);
+                editRemoveImage.style.display = 'block'
+                editRemoveImage.addEventListener('click', function() {
+                    editInputFile.value = ''
+                    editPreviewImage.src = ''
+                    editPreviewImage.style.display = 'none'    
+                    editRemoveImage.style.display = 'none'                
+
+                    console.log("REMOVE IMAGE")
+                })
+            });            
+            editReader.readAsDataURL(editFile);
+
+        }
+        else {
+            console.log("NO FILE CHOSEN")
+            editPreviewImage.src = ''
+            editPreviewImage.style.display = 'none'
+        }
+        console.log(editFile)
+    })
+
     function removeNode(node) {
         var nodeToRemove = document.getElementById(node);
         nodeToRemove.remove();
